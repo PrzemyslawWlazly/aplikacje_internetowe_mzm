@@ -1,184 +1,389 @@
-.counter {
-  font-size: 16px;
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: var(--accent);
-  background: var(--accent-bg);
-  border: 2px solid transparent;
-  transition: border-color 0.3s;
-  margin-bottom: 24px;
+/* Główny ekran jest aplikacją roboczą, a nie landing page'em. */
+.app-shell {
+  min-height: 100svh; /* Wypełniamy cały widoczny ekran. */
+  display: grid; /* Używamy siatki dla panelu bocznego i mapy. */
+  grid-template-columns: 280px minmax(0, 1fr); /* Panel ma stałą szerokość, mapa zajmuje resztę. */
+  background:
+    radial-gradient(circle at 18% 12%, rgba(20, 184, 166, 0.18), transparent 28%),
+    linear-gradient(135deg, #12091f 0%, #241038 48%, #130d2b 100%); /* Ciemnofioletowy klimat monitora. */
+  color: #f7f2ff; /* Jasny tekst ma dobry kontrast na fiolecie. */
+}
 
-  &:hover {
-    border-color: var(--accent-border);
+/* Panel boczny przechowuje nawigację i wybór warstwy. */
+.sidebar {
+  border-right: 1px solid rgba(255, 255, 255, 0.12); /* Delikatnie oddzielamy panel od mapy. */
+  padding: 24px; /* Dajemy przestrzeń na oddech elementom menu. */
+  display: flex; /* Flex ułatwia wypchnięcie statusu na dół. */
+  flex-direction: column; /* Elementy panelu układamy pionowo. */
+  gap: 28px; /* Stały odstęp porządkuje sekcje. */
+  background: rgba(14, 8, 28, 0.7); /* Półprzezroczyste tło wzmacnia głębię. */
+  backdrop-filter: blur(18px); /* Rozmycie wygląda jak panel operatorski. */
+}
+
+/* Brand identyfikuje aplikację. */
+.brand {
+  display: flex; /* Znak i tekst stoją obok siebie. */
+  align-items: center; /* Wyrównujemy logo do tekstu. */
+  gap: 12px; /* Odstęp między znakiem a nazwą. */
+}
+
+/* Kwadratowy znak MZ jest prostym placeholderem logo. */
+.brand-mark {
+  width: 44px; /* Stała szerokość stabilizuje układ. */
+  height: 44px; /* Stała wysokość tworzy kwadrat. */
+  border-radius: 8px; /* Mały promień pasuje do reszty UI. */
+  display: grid; /* Grid pozwala łatwo wyśrodkować tekst. */
+  place-items: center; /* Tekst MZ trafia dokładnie do środka. */
+  background: #5eead4; /* Turkus jest akcentem dla danych i statusów. */
+  color: #130d2b; /* Ciemny tekst kontrastuje z turkusem. */
+  font-weight: 800; /* Mocna waga wzmacnia znak. */
+  font-size: 14px; /* Rozmiar pasuje do małego logo. */
+}
+
+/* Nazwa i podtytuł brandu zajmują osobne linie. */
+.brand strong,
+.brand span {
+  display: block; /* Każdy fragment tekstu zaczyna własną linię. */
+}
+
+/* Główna nazwa aplikacji jest najjaśniejsza. */
+.brand strong {
+  color: #ffffff; /* Biały kolor wyróżnia nazwę. */
+  font-size: 17px; /* Rozmiar jest czytelny, ale nie dominuje. */
+}
+
+/* Druga linia brandu jest spokojniejsza. */
+.brand div > span {
+  color: #b9a6d3; /* Fioletowa szarość jest mniej agresywna. */
+  font-size: 14px; /* Mniejszy rozmiar tworzy hierarchię. */
+}
+
+/* Listy przycisków mają wspólną strukturę. */
+.nav-list,
+.segmented-control,
+.event-list {
+  display: grid; /* Grid daje przewidywalne odstępy. */
+  gap: 8px; /* Mały odstęp grupuje przyciski. */
+}
+
+/* Przyciski dziedziczą font aplikacji. */
+button {
+  font: inherit; /* Dzięki temu button nie wygląda jak domyślny systemowy element. */
+}
+
+/* Wspólny wygląd przycisków panelowych. */
+.nav-item,
+.segmented-control button,
+.event-list button,
+.profile-button {
+  border: 1px solid rgba(255, 255, 255, 0.12); /* Subtelna ramka oddziela przycisk od tła. */
+  background: rgba(255, 255, 255, 0.07); /* Przezroczyste tło pasuje do ciemnego panelu. */
+  color: #f7f2ff; /* Tekst jest jasny i czytelny. */
+  border-radius: 8px; /* Ten sam promień utrzymuje spójność UI. */
+  min-height: 42px; /* Stała wysokość zapobiega skakaniu układu. */
+  cursor: pointer; /* Kursor pokazuje interaktywność. */
+}
+
+/* Elementy nawigacji są wyrównane do lewej jak w narzędziu operatorskim. */
+.nav-item {
+  text-align: left; /* Tekst menu czyta się od lewej. */
+  padding: 10px 12px; /* Padding zwiększa wygodę kliknięcia. */
+}
+
+/* Aktywna warstwa i aktywna pozycja menu dostają akcent. */
+.nav-item.active,
+.segmented-control .selected {
+  border-color: rgba(94, 234, 212, 0.75); /* Turkusowa ramka wskazuje wybór. */
+  background: rgba(94, 234, 212, 0.14); /* Tło wybieranej opcji jest spokojne. */
+  color: #ffffff; /* Aktywna etykieta jest najjaśniejsza. */
+}
+
+/* Nagłówek panelu warstw jest mały, bo to kontrolka pomocnicza. */
+.layer-panel h2 {
+  font-size: 15px; /* Rozmiar nie konkuruje z tytułem strony. */
+  margin: 0 0 10px; /* Odstęp oddziela etykietę od przełącznika. */
+  color: #d7c7ef; /* Jasny fiolet pasuje do palety. */
+}
+
+/* Przełącznik warstw działa jak pionowa lista. */
+.segmented-control {
+  grid-template-columns: 1fr; /* Każda opcja zajmuje pełną szerokość panelu. */
+}
+
+/* Opcje przełącznika mają własny padding. */
+.segmented-control button {
+  padding: 9px 10px; /* Większy obszar kliknięcia poprawia ergonomię. */
+}
+
+/* Karta statusu informuje o stanie pobierania danych. */
+.sync-card {
+  margin-top: auto; /* Status ląduje na dole panelu. */
+  display: grid; /* Teksty układamy pionowo. */
+  gap: 7px; /* Mały odstęp utrzymuje zwartą kartę. */
+  padding: 16px; /* Padding odsuwa tekst od ramki. */
+  border: 1px solid rgba(255, 255, 255, 0.12); /* Ramka definiuje kartę. */
+  border-radius: 8px; /* Karta ma ten sam promień co reszta UI. */
+  background: rgba(255, 255, 255, 0.07); /* Tło karty jest półprzezroczyste. */
+}
+
+/* Pomocnicze teksty są mniej kontrastowe. */
+.sync-card span,
+.sync-card small,
+.eyebrow {
+  color: #b9a6d3; /* Fioletowa szarość sugeruje drugorzędną informację. */
+  font-size: 13px; /* Mały rozmiar pasuje do metadanych. */
+}
+
+/* Status w karcie jest najważniejszy. */
+.sync-card strong {
+  font-size: 16px; /* Rozmiar wyróżnia aktualny stan. */
+}
+
+/* Główna część ekranu trzyma nagłówek, statystyki i mapę. */
+.workspace {
+  min-width: 0; /* To chroni grid przed rozpychaniem przez długie teksty. */
+  padding: 28px; /* Margines wewnętrzny daje przestrzeń wokół mapy. */
+  display: grid; /* Układamy sekcje w pionowej siatce. */
+  gap: 20px; /* Stały odstęp między sekcjami. */
+  align-content: start; /* Treść zaczyna się od góry. */
+}
+
+/* Topbar łączy opis warstwy i przycisk demo. */
+.topbar {
+  display: flex; /* Tekst i przycisk stoją obok siebie. */
+  justify-content: space-between; /* Przycisk trafia do prawej krawędzi. */
+  align-items: start; /* Elementy wyrównujemy do góry. */
+  gap: 20px; /* Odstęp zapobiega zderzeniu elementów. */
+}
+
+/* Tytuł warstwy jest głównym nagłówkiem ekranu. */
+.topbar h1 {
+  margin: 4px 0 6px; /* Mały margines łączy tytuł z opisem. */
+  color: #ffffff; /* Biały tytuł ma najwyższy kontrast. */
+  font-size: 34px; /* Rozmiar jest duży, ale nadal narzędziowy. */
+  line-height: 1.08; /* Ciasna interlinia pasuje do nagłówka. */
+  font-weight: 760; /* Mocna waga daje charakter dashboardu. */
+}
+
+/* Opis pod tytułem wyjaśnia aktywną warstwę. */
+.topbar p {
+  max-width: 660px; /* Ograniczamy długość wiersza dla czytelności. */
+  color: #cfc3e2; /* Opis jest jaśniejszy niż metadane, ale słabszy niż tytuł. */
+  font-size: 15px; /* Rozmiar pasuje do tekstu pomocniczego. */
+}
+
+/* Przycisk profilu jest placeholderem przyszłego logowania. */
+.profile-button {
+  width: 72px; /* Stała szerokość zapobiega zmianom layoutu. */
+  flex: 0 0 auto; /* Przycisk nie kurczy się w topbarze. */
+}
+
+/* Karty statystyk tworzą szybki panel podsumowania. */
+.stats-grid {
+  display: grid; /* Trzy karty układamy w jednej linii. */
+  grid-template-columns: repeat(3, minmax(0, 1fr)); /* Każda karta ma równą szerokość. */
+  gap: 12px; /* Odstęp rozdziela karty. */
+}
+
+/* Pojedyncza karta statystyki. */
+.stat-card {
+  min-height: 82px; /* Stała wysokość stabilizuje dashboard. */
+  padding: 16px; /* Tekst nie dotyka krawędzi. */
+  display: grid; /* Etykieta i wartość układają się pionowo. */
+  align-content: center; /* Zawartość jest wyśrodkowana w karcie. */
+  gap: 5px; /* Mały odstęp łączy etykietę z wartością. */
+  border-radius: 8px; /* Spójny promień narożników. */
+  border: 1px solid rgba(255, 255, 255, 0.12); /* Ramka definiuje granice karty. */
+  background: rgba(255, 255, 255, 0.08); /* Półprzezroczyste tło pasuje do mapy. */
+}
+
+/* Etykieta statystyki jest drugorzędna. */
+.stat-card span {
+  color: #b9a6d3; /* Spokojny kolor metadanych. */
+  font-size: 13px; /* Mały tekst nie konkuruje z wartością. */
+}
+
+/* Wartość statystyki jest najważniejsza. */
+.stat-card strong {
+  font-size: 28px; /* Duża liczba ułatwia skanowanie. */
+  color: #ffffff; /* Wartość jest mocno widoczna. */
+}
+
+/* Układ mapy i panelu szczegółów. */
+.map-layout {
+  display: grid; /* Mapa i panel stoją obok siebie. */
+  grid-template-columns: minmax(0, 1fr) 320px; /* Panel ma stałą szerokość, mapa resztę. */
+  gap: 16px; /* Odstęp oddziela mapę od szczegółów. */
+  align-items: stretch; /* Obie kolumny mają spójny pionowy zasięg. */
+}
+
+/* Kontener mapy jest ramką dla Leafleta. */
+.map-surface {
+  min-height: 580px; /* Leaflet wymaga realnej wysokości kontenera. */
+  overflow: hidden; /* Kafelki i markery nie wychodzą poza ramkę. */
+  border-radius: 8px; /* Mapa jest osadzona w spokojnej ramce. */
+  border: 1px solid rgba(255, 255, 255, 0.14); /* Ramka oddziela mapę od tła. */
+  background: #130d2b; /* Tło jest widoczne zanim kafelki się załadują. */
+}
+
+/* Właściwy element mapy Leaflet wypełnia kontener. */
+.leaflet-map {
+  width: 100%; /* Mapa zajmuje całą szerokość ramki. */
+  height: 580px; /* Stała wysokość stabilizuje widok desktopowy. */
+  min-height: 100%; /* Mapa nie kurczy się poniżej kontenera. */
+  background: #130d2b; /* Ciemne tło pod kafelkami. */
+}
+
+/* Kafelki mapy lekko przyciemniamy, żeby pasowały do fioletowego UI. */
+.leaflet-tile-pane {
+  filter: saturate(0.78) brightness(0.72) hue-rotate(12deg); /* Mapa nadal jest prawdziwa, ale mniej jaskrawa. */
+}
+
+/* Popup Leafleta dostaje kolory zgodne z aplikacją. */
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: #211139; /* Popup ma ciemnofioletowe tło. */
+  color: #f7f2ff; /* Tekst popupu jest jasny. */
+}
+
+/* Panel szczegółów prezentuje aktualnie wybrany marker. */
+.details-panel {
+  border-radius: 8px; /* Spójny promień narożników. */
+  border: 1px solid rgba(255, 255, 255, 0.12); /* Ramka definiuje panel. */
+  background: rgba(14, 8, 28, 0.62); /* Półprzezroczyste tło pasuje do sidebaru. */
+  padding: 20px; /* Tekst ma wygodny odstęp od krawędzi. */
+  display: flex; /* Flex pozwala wypchnąć listę na dół. */
+  flex-direction: column; /* Panel układamy pionowo. */
+  gap: 18px; /* Odstęp między sekcjami panelu. */
+}
+
+/* Tytuł zaznaczonego punktu. */
+.details-panel h2 {
+  margin: 2px 0 0; /* Tytuł trzymamy blisko etykiety. */
+  color: #ffffff; /* Tytuł ma wysoki kontrast. */
+  font-size: 24px; /* Rozmiar jest czytelny w wąskim panelu. */
+}
+
+/* Komunikat ładowania lub błędu. */
+.panel-note {
+  margin: 0; /* Usuwamy domyślny margines akapitu. */
+  color: #d7c7ef; /* Neutralny kolor komunikatu. */
+  font-size: 14px; /* Komunikat nie dominuje panelu. */
+}
+
+/* Błąd dostaje cieplejszy kolor. */
+.panel-note.error {
+  color: #fda4af; /* Róż ostrzega, ale pasuje do palety. */
+}
+
+/* Lista definicji dobrze pasuje do par etykieta-wartość. */
+dl {
+  display: grid; /* Każda para jest osobnym wierszem. */
+  gap: 10px; /* Odstęp rozdziela metryki. */
+  margin: 0; /* Usuwamy domyślny margines. */
+}
+
+/* Pojedynczy wiersz szczegółów. */
+dl div {
+  display: flex; /* Etykieta i wartość stoją po przeciwnych stronach. */
+  justify-content: space-between; /* Wartość trafia do prawej krawędzi. */
+  gap: 12px; /* Odstęp chroni teksty przed zderzeniem. */
+  padding-bottom: 10px; /* Odstęp nad linią podziału. */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Linia poprawia skanowanie. */
+}
+
+/* Etykieta szczegółu jest spokojna. */
+dt {
+  color: #b9a6d3; /* Kolor metadanych. */
+}
+
+/* Wartość szczegółu jest mocniejsza. */
+dd {
+  margin: 0; /* Usuwamy domyślne wcięcie definicji. */
+  color: #ffffff; /* Wartość jest jasna. */
+  font-weight: 700; /* Pogrubienie pomaga skanować panel. */
+  text-align: right; /* Długie wartości trzymają prawą krawędź. */
+}
+
+/* Lista punktów pozwala szybko zmienić zaznaczenie. */
+.event-list {
+  margin-top: auto; /* Lista schodzi na dół panelu, gdy jest miejsce. */
+}
+
+/* Pojedynczy przycisk na liście punktów. */
+.event-list button {
+  min-height: 46px; /* Stała wysokość poprawia ergonomię. */
+  padding: 8px 10px; /* Padding zwiększa obszar kliknięcia. */
+  display: flex; /* Nazwa i wartość stoją w jednej linii. */
+  justify-content: space-between; /* Wartość trafia do prawej strony. */
+  align-items: center; /* Wyrównanie w pionie. */
+  gap: 10px; /* Odstęp między nazwą a wartością. */
+  text-align: left; /* Nazwy miejsc czytamy od lewej. */
+}
+
+/* Nazwy miejsc mogą być długie, więc przycinamy je elegancko. */
+.event-list span {
+  overflow: hidden; /* Nadmiar tekstu nie rozpycha panelu. */
+  text-overflow: ellipsis; /* Wielokropek sygnalizuje obcięcie. */
+  white-space: nowrap; /* Jedna linia utrzymuje stabilną wysokość. */
+}
+
+/* Wartość na liście ma kolor akcentu. */
+.event-list strong {
+  color: #5eead4; /* Turkus dobrze wyróżnia liczby. */
+  flex: 0 0 auto; /* Wartość nie kurczy się przy długiej nazwie. */
+}
+
+/* Tabletowy układ przenosi sidebar nad mapę. */
+@media (max-width: 1100px) {
+  .app-shell {
+    grid-template-columns: 1fr; /* Jedna kolumna lepiej działa na mniejszych ekranach. */
   }
-  &:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
+
+  .sidebar {
+    position: static; /* Sidebar nie musi być przyklejony. */
+    border-right: 0; /* Usuwamy pionową ramkę. */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12); /* Dodajemy ramkę poziomą. */
+  }
+
+  .nav-list {
+    grid-template-columns: repeat(4, minmax(0, 1fr)); /* Nawigacja mieści się w rzędzie. */
+  }
+
+  .map-layout {
+    grid-template-columns: 1fr; /* Panel szczegółów schodzi pod mapę. */
+  }
+
+  .details-panel {
+    min-height: 0; /* Panel nie wymusza zbędnej wysokości. */
   }
 }
 
-.hero {
-  position: relative;
-
-  .base,
-  .framework,
-  .vite {
-    inset-inline: 0;
-    margin: 0 auto;
+/* Układ mobilny upraszcza wszystkie kolumny. */
+@media (max-width: 720px) {
+  .sidebar,
+  .workspace {
+    padding: 18px; /* Mniejszy padding zostawia więcej miejsca na mapę. */
   }
 
-  .base {
-    width: 170px;
-    position: relative;
-    z-index: 0;
+  .nav-list,
+  .stats-grid {
+    grid-template-columns: 1fr; /* Przyciski i statystyki układamy pionowo. */
   }
 
-  .framework,
-  .vite {
-    position: absolute;
+  .topbar {
+    display: grid; /* Nagłówek przechodzi w jedną kolumnę. */
   }
 
-  .framework {
-    z-index: 1;
-    top: 34px;
-    height: 28px;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
-      scale(1.4);
+  .topbar h1 {
+    font-size: 28px; /* Mniejszy tytuł mieści się na telefonie. */
   }
 
-  .vite {
-    z-index: 0;
-    top: 107px;
-    height: 26px;
-    width: auto;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
-      scale(0.8);
-  }
-}
-
-#center {
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-  place-content: center;
-  place-items: center;
-  flex-grow: 1;
-
-  @media (max-width: 1024px) {
-    padding: 32px 20px 24px;
-    gap: 18px;
-  }
-}
-
-#next-steps {
-  display: flex;
-  border-top: 1px solid var(--border);
-  text-align: left;
-
-  & > div {
-    flex: 1 1 0;
-    padding: 32px;
-    @media (max-width: 1024px) {
-      padding: 24px 20px;
-    }
+  .map-surface {
+    min-height: 470px; /* Mapa nadal ma użyteczną wysokość. */
   }
 
-  .icon {
-    margin-bottom: 16px;
-    width: 22px;
-    height: 22px;
-  }
-
-  @media (max-width: 1024px) {
-    flex-direction: column;
-    text-align: center;
-  }
-}
-
-#docs {
-  border-right: 1px solid var(--border);
-
-  @media (max-width: 1024px) {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
-}
-
-#next-steps ul {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  gap: 8px;
-  margin: 32px 0 0;
-
-  .logo {
-    height: 18px;
-  }
-
-  a {
-    color: var(--text-h);
-    font-size: 16px;
-    border-radius: 6px;
-    background: var(--social-bg);
-    display: flex;
-    padding: 6px 12px;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    transition: box-shadow 0.3s;
-
-    &:hover {
-      box-shadow: var(--shadow);
-    }
-    .button-icon {
-      height: 18px;
-      width: 18px;
-    }
-  }
-
-  @media (max-width: 1024px) {
-    margin-top: 20px;
-    flex-wrap: wrap;
-    justify-content: center;
-
-    li {
-      flex: 1 1 calc(50% - 8px);
-    }
-
-    a {
-      width: 100%;
-      justify-content: center;
-      box-sizing: border-box;
-    }
-  }
-}
-
-#spacer {
-  height: 88px;
-  border-top: 1px solid var(--border);
-  @media (max-width: 1024px) {
-    height: 48px;
-  }
-}
-
-.ticks {
-  position: relative;
-  width: 100%;
-
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    top: -4.5px;
-    border: 5px solid transparent;
-  }
-
-  &::before {
-    left: 0;
-    border-left-color: var(--border);
-  }
-  &::after {
-    right: 0;
-    border-right-color: var(--border);
+  .leaflet-map {
+    height: 470px; /* Wysokość Leafleta musi odpowiadać kontenerowi. */
   }
 }

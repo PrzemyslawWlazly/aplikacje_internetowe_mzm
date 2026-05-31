@@ -1,13 +1,20 @@
 <!doctype html>
-<html lang="en">
+<!-- Ustawiamy język dokumentu na polski, bo interfejs aplikacji jest po polsku. -->
+<html lang="pl">
   <head>
+    <!-- Kodowanie UTF-8 pozwala poprawnie wyświetlać polskie znaki. -->
     <meta charset="UTF-8" />
+    <!-- Ikona aplikacji jest ładowana z katalogu public Vite. -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- Viewport sprawia, że layout działa poprawnie na telefonach i desktopie. -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
+    <!-- Tytuł karty przeglądarki odpowiada nazwie projektu. -->
+    <title>Matka Ziemia Monitor</title>
   </head>
   <body>
+    <!-- React montuje całą aplikację wewnątrz tego elementu. -->
     <div id="root"></div>
+    <!-- Główny moduł JavaScript uruchamia aplikację React przez Vite. -->
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

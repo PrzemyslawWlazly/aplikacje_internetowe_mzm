@@ -14,9 +14,17 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import path
+from django.contrib import admin  # Admin Django pozwala podejrzeć dane zapisane w bazie.
+from django.urls import include, path  # include podpina adresy z aplikacji, a path definiuje pojedynczą trasę.
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView  # Widoki generują dokumentację OpenAPI.
 
-urlpatterns = [
-    path('admin/', admin.site.urls),
+urlpatterns = [  # Główna lista tras całego backendu.
+    path('admin/', admin.site.urls),  # Panel administracyjny Django.
+    path('api/', include('observations.urls')),  # Publiczne endpointy danych środowiskowych.
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),  # Surowy schemat OpenAPI w JSON/YAML.
+    path(
+        'api/docs/',
+        SpectacularSwaggerView.as_view(url_name='schema'),
+        name='swagger-ui',
+    ),  # Interaktywna dokumentacja Swagger UI.
 ]
