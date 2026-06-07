@@ -20,6 +20,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView  # 
 
 urlpatterns = [  # Główna lista tras całego backendu.
     path('admin/', admin.site.urls),  # Panel administracyjny Django.
+    path('api/auth/', include('accounts.urls')),  # Logowanie Google, profil i odświeżanie lokalnego JWT.
     path('api/', include('observations.urls')),  # Publiczne endpointy danych środowiskowych.
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),  # Surowy schemat OpenAPI w JSON/YAML.
     path(

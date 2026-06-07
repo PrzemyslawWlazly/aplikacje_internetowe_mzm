@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 import os
+from datetime import timedelta  # timedelta pozwala czytelnie określić czas ważności tokenów JWT.
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -165,6 +166,16 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+# Client ID jest publicznym identyfikatorem aplikacji i służy do sprawdzania pola aud tokenu Google.
+GOOGLE_OAUTH_CLIENT_ID = os.getenv('GOOGLE_OAUTH_CLIENT_ID', '')
+
+# Access token jest krótki, a refresh token pozwala utrzymać sesję bez częstego logowania przez Google.
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),  # Krótki czas ogranicza skutki przejęcia access tokenu.
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),  # Użytkownik pozostaje zalogowany maksymalnie przez tydzień.
+    'ROTATE_REFRESH_TOKENS': False,  # Na tym etapie zachowujemy prosty mechanizm jednego refresh tokenu.
 }
 
 SPECTACULAR_SETTINGS = {

@@ -148,7 +148,7 @@ button {
   align-content: start; /* Treść zaczyna się od góry. */
 }
 
-/* Topbar łączy opis warstwy i przycisk demo. */
+/* Topbar łączy opis warstwy i kontrolki konta użytkownika. */
 .topbar {
   display: flex; /* Tekst i przycisk stoją obok siebie. */
   justify-content: space-between; /* Przycisk trafia do prawej krawędzi. */
@@ -172,10 +172,166 @@ button {
   font-size: 15px; /* Rozmiar pasuje do tekstu pomocniczego. */
 }
 
-/* Przycisk profilu jest placeholderem przyszłego logowania. */
+/* Kontener grupuje profil i wylogowanie bez przesuwania nagłówka. */
+.profile-actions {
+  display: flex; /* Profil i przycisk wylogowania stoją obok siebie. */
+  align-items: center; /* Elementy mają wspólną oś pionową. */
+  justify-content: flex-end; /* Kontrolki pozostają przy prawej krawędzi. */
+  gap: 8px; /* Mały odstęp rozdziela informacje od akcji. */
+  flex: 0 0 auto; /* Grupa nie kurczy się pod wpływem długiego tytułu mapy. */
+}
+
+/* Przycisk profilu otwiera okno logowania. */
 .profile-button {
-  width: 72px; /* Stała szerokość zapobiega zmianom layoutu. */
+  min-width: 82px; /* Stała minimalna szerokość zapobiega zmianom layoutu. */
+  padding: 0 14px; /* Poziomy padding daje wygodny obszar kliknięcia. */
   flex: 0 0 auto; /* Przycisk nie kurczy się w topbarze. */
+}
+
+/* Podsumowanie profilu pokazuje zdjęcie oraz krótką nazwę użytkownika. */
+.profile-summary {
+  min-height: 42px; /* Wysokość jest zgodna z przyciskami interfejsu. */
+  max-width: 220px; /* Długi e-mail nie może zająć całego nagłówka. */
+  padding: 5px 10px 5px 5px; /* Zdjęcie znajduje się bliżej lewej krawędzi. */
+  display: flex; /* Avatar i nazwa stoją w jednej linii. */
+  align-items: center; /* Wyśrodkowujemy elementy w pionie. */
+  gap: 9px; /* Odstęp oddziela avatar od nazwy. */
+  border: 1px solid rgba(255, 255, 255, 0.12); /* Ramka wiąże elementy w jedną kontrolkę. */
+  border-radius: 8px; /* Promień pozostaje spójny z resztą aplikacji. */
+  background: rgba(255, 255, 255, 0.07); /* Tło odróżnia profil od nagłówka. */
+}
+
+/* Zdjęcie oraz zastępczy inicjał mają taki sam stabilny rozmiar. */
+.profile-summary img,
+.profile-summary > span {
+  width: 30px; /* Stała szerokość zapobiega skakaniu układu. */
+  height: 30px; /* Stała wysokość tworzy kwadratowy avatar. */
+  border-radius: 50%; /* Zdjęcia profilowe pokazujemy w popularnym okrągłym kształcie. */
+  flex: 0 0 auto; /* Avatar nie kurczy się przy dłuższym imieniu. */
+}
+
+/* Zdjęcie wypełnia obszar bez zniekształcania proporcji. */
+.profile-summary img {
+  object-fit: cover; /* Fragment zdjęcia dopasowuje się do okrągłej ramki. */
+}
+
+/* Inicjał zastępuje zdjęcie, gdy konto Google go nie udostępnia. */
+.profile-summary > span {
+  display: grid; /* Grid ułatwia dokładne wyśrodkowanie litery. */
+  place-items: center; /* Litera trafia na środek avatara. */
+  background: #5eead4; /* Turkus łączy avatar z akcentem aplikacji. */
+  color: #130d2b; /* Ciemna litera ma wysoki kontrast na turkusie. */
+  font-weight: 800; /* Mocna litera jest czytelna przy małym rozmiarze. */
+}
+
+/* Nazwa użytkownika jest skracana, aby nie wypchnęła innych kontrolek. */
+.profile-summary strong {
+  overflow: hidden; /* Nadmiar tekstu nie wychodzi poza kontrolkę. */
+  text-overflow: ellipsis; /* Wielokropek informuje o skróceniu nazwy. */
+  white-space: nowrap; /* Jedna linia utrzymuje stałą wysokość topbara. */
+  font-size: 14px; /* Kompaktowy rozmiar pasuje do kontrolki profilu. */
+}
+
+/* Wylogowanie jest spokojną, drugorzędną akcją. */
+.logout-button,
+.auth-close-button {
+  min-height: 42px; /* Wysokość odpowiada pozostałym przyciskom. */
+  padding: 0 12px; /* Padding zapewnia wygodny obszar kliknięcia. */
+  border: 1px solid rgba(255, 255, 255, 0.12); /* Delikatna ramka definiuje przycisk. */
+  border-radius: 8px; /* Narożniki są spójne z systemem UI. */
+  background: rgba(255, 255, 255, 0.04); /* Słabsze tło wskazuje akcję pomocniczą. */
+  color: #d7c7ef; /* Tekst jest czytelny bez konkurowania z główną akcją. */
+  cursor: pointer; /* Kursor pokazuje możliwość kliknięcia. */
+}
+
+/* Tło modala zasłania mapę i skupia uwagę na logowaniu. */
+.auth-backdrop {
+  position: fixed; /* Modal pozostaje na ekranie niezależnie od przewinięcia. */
+  inset: 0; /* Warstwa przykrywa cały viewport. */
+  z-index: 2000; /* Wartość jest wyższa niż warstwy i kontrolki Leafleta. */
+  display: grid; /* Grid ułatwia wyśrodkowanie panelu. */
+  place-items: center; /* Panel trafia na środek ekranu. */
+  padding: 20px; /* Na telefonie panel nie dotknie krawędzi ekranu. */
+  background: rgba(7, 4, 16, 0.78); /* Ciemne tło zachowuje fioletowy charakter aplikacji. */
+  backdrop-filter: blur(8px); /* Rozmycie oddziela modal od aktywnej mapy. */
+}
+
+/* Panel logowania jest pojedynczym, czytelnym narzędziem. */
+.auth-dialog {
+  width: min(100%, 420px); /* Panel dopasowuje się do telefonu i ma limit na desktopie. */
+  min-height: 260px; /* Stała minimalna wysokość zapobiega skokom przy komunikatach. */
+  padding: 24px; /* Zawartość ma równy oddech od każdej krawędzi. */
+  display: grid; /* Elementy formularza układamy pionowo. */
+  align-content: start; /* Zawartość zaczyna się od góry panelu. */
+  gap: 20px; /* Odstęp czytelnie rozdziela nagłówek, opis i przycisk. */
+  border: 1px solid rgba(255, 255, 255, 0.16); /* Ramka wyznacza granice modala. */
+  border-radius: 8px; /* Panel przestrzega wspólnego promienia kart. */
+  background: #1b0e2e; /* Pełne tło zapewnia dobry kontrast nad mapą. */
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42); /* Cień wizualnie oddziela panel od mapy. */
+}
+
+/* Nagłówek modala rozstawia tytuł i kontrolkę zamknięcia. */
+.auth-dialog-header {
+  display: flex; /* Tytuł i przycisk stoją w jednej linii. */
+  align-items: start; /* Oba elementy zaczynają się przy górnej krawędzi. */
+  justify-content: space-between; /* Przycisk trafia do prawego rogu. */
+  gap: 16px; /* Odstęp chroni tytuł przed zderzeniem z przyciskiem. */
+}
+
+/* Tytuł logowania ma skalę odpowiednią dla kompaktowego panelu. */
+.auth-dialog h2 {
+  margin: 4px 0 0; /* Tytuł trzymamy blisko etykiety eyebrow. */
+  color: #ffffff; /* Biały kolor nadaje tytułowi najwyższy kontrast. */
+  font-size: 24px; /* Rozmiar jest wyraźny, ale nie udaje nagłówka hero. */
+  line-height: 1.2; /* Interlinia chroni tekst przy ewentualnym zawinięciu. */
+}
+
+/* Opis logowania pozostaje informacją pomocniczą. */
+.auth-dialog > p {
+  margin: 0; /* Usuwamy domyślne marginesy akapitu. */
+  color: #cfc3e2; /* Spokojny kolor zachowuje hierarchię tekstu. */
+  font-size: 14px; /* Opis jest mniejszy od tytułu. */
+  line-height: 1.55; /* Większa interlinia poprawia czytelność dwóch linii. */
+}
+
+/* Kontener oficjalnego przycisku Google ma stabilną wysokość i szerokość. */
+.google-sign-in {
+  position: relative; /* Pozycjonujemy warstwę blokującą względem przycisku. */
+  width: 280px; /* Szerokość odpowiada wartości przekazanej rendererowi Google. */
+  min-height: 44px; /* Miejsce nie zapada się podczas ładowania skryptu. */
+  max-width: 100%; /* Kontener nie wyjdzie poza panel na wąskim ekranie. */
+  justify-self: center; /* Przycisk jest wyśrodkowany w modalu. */
+}
+
+/* Stan disabled jest wizualnie słabszy podczas requestu. */
+.google-sign-in.disabled {
+  opacity: 0.62; /* Przygaszenie informuje o chwilowej niedostępności. */
+}
+
+/* Warstwa przechwytuje kliknięcia podczas przetwarzania logowania. */
+.google-sign-in-blocker {
+  position: absolute; /* Warstwa dokładnie przykrywa przycisk Google. */
+  inset: 0; /* Każda krawędź pokrywa się z kontenerem. */
+  cursor: wait; /* Kursor pokazuje trwającą operację. */
+}
+
+/* Rezerwujemy miejsce na status, żeby modal nie zmieniał wysokości. */
+.auth-status {
+  min-height: 22px; /* Jedna linia komunikatu ma zawsze dostępne miejsce. */
+  color: #b9a6d3; /* Neutralny stan pasuje do metadanych. */
+  font-size: 13px; /* Komunikat pozostaje dyskretny. */
+  text-align: center; /* Status znajduje się pod centralnym przyciskiem. */
+}
+
+/* Błąd logowania otrzymuje kolor ostrzegawczy. */
+.auth-status.error {
+  color: #fda4af; /* Róż jest czytelny na ciemnym tle i zgodny z resztą UI. */
+}
+
+/* Zablokowany przycisk zamknięcia nie powinien sugerować interaktywności. */
+.auth-close-button:disabled {
+  cursor: not-allowed; /* Kursor jasno wskazuje chwilową blokadę. */
+  opacity: 0.55; /* Przygaszenie wzmacnia stan disabled. */
 }
 
 /* Karty statystyk tworzą szybki panel podsumowania. */
@@ -373,6 +529,11 @@ dd {
 
   .topbar {
     display: grid; /* Nagłówek przechodzi w jedną kolumnę. */
+  }
+
+  .profile-actions {
+    justify-content: start; /* Na telefonie profil zaczyna się od lewej jak reszta nagłówka. */
+    flex-wrap: wrap; /* Kontrolki mogą przejść do kolejnego wiersza bez nakładania. */
   }
 
   .topbar h1 {

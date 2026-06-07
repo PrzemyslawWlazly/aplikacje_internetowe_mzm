@@ -46,6 +46,9 @@ services:
       - /app/node_modules
     ports:
       - "5173:5173"
+    # Vite odczytuje publiczny Client ID Google ze zmiennej rozpoczynającej się od VITE_.
+    env_file:
+      - .env.example
     depends_on:
       - backend
 

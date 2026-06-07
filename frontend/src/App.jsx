@@ -1,5 +1,5 @@
 // Importujemy hooki Reacta, bo komponent przechowuje dane z API i reaguje na zmianę warstwy.
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 // Importujemy Axios, żeby frontend wykonywał czytelne requesty HTTP do backendu.
 import axios from 'axios'
 // Importujemy komponenty React Leaflet, czyli prawdziwą bibliotekę mapową opartą o Leaflet.
@@ -20,9 +20,14 @@ import cycloneIconUrl from '../pictures/cyclone.svg'
 import stormIconUrl from '../pictures/storm.svg'
 // Importujemy lokalne style aplikacji.
 import './App.css'
-
-// Definiujemy bazowy adres API; w Dockerze lub na produkcji można go nadpisać przez zmienną Vite.
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000/api'
+// Importujemy oficjalny przycisk Google Identity Services opakowany w komponent React.
+import GoogleSignIn from './auth/GoogleSignIn'
+// Importujemy requesty odpowiedzialne za logowanie, profil i odświeżanie lokalnego JWT.
+import { exchangeGoogleCredential, fetchCurrentUser, refreshAccessToken } from './auth/api'
+// Importujemy funkcje utrwalające sesję między odświeżeniami przeglądarki.
+import { clearAuthSession, readAuthSession, saveAuthSession } from './auth/session'
+// Importujemy wspólny adres API i publiczny identyfikator klienta Google.
+import { API_BASE_URL, GOOGLE_CLIENT_ID } from './config'
 
 // Definiujemy konfigurację mapy pogodowej ustawionej globalnie, bo pokazujemy stolice świata i miasta G20.
 const WEATHER_VIEW = { center: [20, 10], zoom: 2 }
@@ -226,6 +231,14 @@ function seismicRadius(magnitude) {
 
 // Główny komponent aplikacji renderuje panel, statystyki i mapę.
 function App() {
+  // Sesję inicjalizujemy danymi z localStorage, aby profil nie znikał podczas odświeżenia strony.
+  const [authSession, setAuthSession] = useState(() => readAuthSession())
+  // Ten stan steruje widocznością okna logowania.
+  const [authDialogOpen, setAuthDialogOpen] = useState(false)
+  // Flaga blokuje ponowne kliknięcie przycisku podczas wymiany tokenu z backendem.
+  const [authLoading, setAuthLoading] = useState(false)
+  // Osobny komunikat błędu nie miesza problemów logowania z błędami danych pogodowych.
+  const [authError, setAuthError] = useState('')
   // Aktywny tryb decyduje, czy pokazujemy pogodę w Polsce, czy sejsmikę świata.
   const [activeMode, setActiveMode] = useState('weather')
   // Stan z danymi pogodowymi pochodzi z endpointu /api/weather/current/.
@@ -254,6 +267,106 @@ function App() {
   const [loading, setLoading] = useState(true)
   // Error przechowuje komunikat, gdy backend albo API zewnętrzne nie odpowie.
   const [error, setError] = useState('')
+
+  // Efekt sprawdza zapisaną sesję i w razie potrzeby odnawia wygasły access token.
+  useEffect(() => {
+    // Bez zapisanej sesji nie wykonujemy żadnego requestu autoryzacyjnego.
+    if (!authSession) return undefined
+    // Flaga chroni przed aktualizacją stanu po odmontowaniu komponentu.
+    let active = true
+
+    // Funkcja próbuje potwierdzić profil aktualnym access tokenem.
+    async function restoreSession() {
+      try {
+        // Poprawny token zwraca aktualne dane użytkownika z backendu.
+        const user = await fetchCurrentUser(authSession.access)
+        // Aktualizujemy profil tylko wtedy, gdy komponent nadal istnieje.
+        if (active) {
+          const verifiedSession = { ...authSession, user }
+          setAuthSession(verifiedSession)
+          saveAuthSession(verifiedSession)
+        }
+      } catch (profileError) {
+        // Odświeżanie ma sens wyłącznie dla błędu 401 i dostępnego refresh tokenu.
+        if (profileError.response?.status === 401 && authSession.refresh) {
+          try {
+            // Backend wymienia refresh token na nowy access token.
+            const access = await refreshAccessToken(authSession.refresh)
+            // Nowy access token powinien ponownie umożliwić pobranie profilu.
+            const user = await fetchCurrentUser(access)
+            // Zapisujemy odnowioną sesję w stanie i localStorage.
+            if (active) {
+              const refreshedSession = { ...authSession, access, user }
+              setAuthSession(refreshedSession)
+              saveAuthSession(refreshedSession)
+            }
+            // Po udanym odświeżeniu kończymy obsługę błędu.
+            return
+          } catch {
+            // Nieudany refresh oznacza, że użytkownik powinien zalogować się ponownie.
+          }
+        }
+        // Błąd profilu albo refreshu unieważnia lokalną kopię sesji.
+        if (active) {
+          clearAuthSession()
+          setAuthSession(null)
+        }
+      }
+    }
+
+    // Uruchamiamy sprawdzenie sesji po pierwszym renderze.
+    restoreSession()
+
+    // Cleanup wyłącza późne aktualizacje stanu.
+    return () => {
+      active = false
+    }
+    // Efekt celowo działa tylko dla sesji wczytanej przy starcie, a nie po każdym odnowieniu tokenu.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Callback wymienia token ID Google na lokalną sesję JWT.
+  const handleGoogleCredential = useCallback(async (credential) => {
+    // Czyścimy poprzedni błąd przed nową próbą logowania.
+    setAuthError('')
+    // Blokujemy przycisk do zakończenia requestu.
+    setAuthLoading(true)
+
+    try {
+      // Backend weryfikuje token Google i zwraca własne tokeny oraz profil.
+      const session = await exchangeGoogleCredential(credential)
+      // Zapisujemy sesję, aby przetrwała odświeżenie strony.
+      saveAuthSession(session)
+      // Aktualizujemy nagłówek aplikacji danymi zalogowanego użytkownika.
+      setAuthSession(session)
+      // Zamykamy modal dopiero po pełnym sukcesie requestu.
+      setAuthDialogOpen(false)
+    } catch (loginError) {
+      // Preferujemy komunikat backendu, a przy błędzie sieci pokazujemy komunikat Axios.
+      const detail = loginError.response?.data?.detail ?? loginError.message
+      // Błąd pozostaje w modalu, aby użytkownik mógł spróbować ponownie.
+      setAuthError(`Nie udało się zalogować: ${detail}`)
+    } finally {
+      // Odblokowujemy kontrolkę niezależnie od wyniku requestu.
+      setAuthLoading(false)
+    }
+  }, [])
+
+  // Callback otrzymuje błędy skryptu Google z komponentu przycisku.
+  const handleGoogleError = useCallback((message) => {
+    // Zachowujemy jeden czytelny komunikat w oknie logowania.
+    setAuthError(message)
+  }, [])
+
+  // Funkcja usuwa lokalne tokeny i wyłącza automatyczny wybór konta Google.
+  function logout() {
+    // Czyścimy trwałą kopię sesji w przeglądarce.
+    clearAuthSession()
+    // Czyścimy stan Reacta, aby natychmiast pokazać przycisk logowania.
+    setAuthSession(null)
+    // Google nie powinno automatycznie wybierać poprzedniego konta po świadomym wylogowaniu.
+    window.google?.accounts?.id?.disableAutoSelect()
+  }
 
   // Efekt startowy pobiera prawdziwe dane z backendu po pierwszym renderze.
   useEffect(() => {
@@ -504,7 +617,36 @@ function App() {
             <h1>{mode.title}</h1>
             <p>{mode.subtitle}</p>
           </div>
-          <button className="profile-button" type="button">Demo</button>
+          {/* Prawa część nagłówka pokazuje logowanie albo profil aktywnego użytkownika. */}
+          <div className="profile-actions">
+            {authSession ? (
+              <>
+                {/* Profil używa zdjęcia Google, a przy jego braku pokazuje inicjał. */}
+                <div className="profile-summary" title={authSession.user.email}>
+                  {authSession.user.picture_url ? (
+                    <img alt="" src={authSession.user.picture_url} />
+                  ) : (
+                    <span aria-hidden="true">{(authSession.user.first_name || authSession.user.email)[0]?.toUpperCase()}</span>
+                  )}
+                  <strong>{authSession.user.first_name || authSession.user.email}</strong>
+                </div>
+                {/* Wylogowanie usuwa tokeny tylko z tej aplikacji, bez wylogowywania całego konta Google. */}
+                <button className="logout-button" onClick={logout} type="button">Wyloguj</button>
+              </>
+            ) : (
+              /* Niezalogowany użytkownik może otworzyć modal z oficjalnym przyciskiem Google. */
+              <button
+                className="profile-button"
+                onClick={() => {
+                  setAuthError('')
+                  setAuthDialogOpen(true)
+                }}
+                type="button"
+              >
+                Zaloguj
+              </button>
+            )}
+          </div>
         </header>
 
         {/* Karty pokazują szybkie podsumowanie aktualnej warstwy. */}
@@ -766,6 +908,54 @@ function App() {
           </aside>
         </section>
       </section>
+
+      {/* Modal izoluje proces logowania od mapy i pozostawia aplikację czytelną na małym ekranie. */}
+      {authDialogOpen && (
+        <div
+          aria-labelledby="auth-dialog-title"
+          aria-modal="true"
+          className="auth-backdrop"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !authLoading) setAuthDialogOpen(false)
+          }}
+          role="dialog"
+        >
+          {/* Panel zawiera tylko niezbędne informacje oraz oficjalny przycisk Google. */}
+          <section className="auth-dialog">
+            <div className="auth-dialog-header">
+              <div>
+                <span className="eyebrow">Konto użytkownika</span>
+                <h2 id="auth-dialog-title">Zaloguj się</h2>
+              </div>
+              {/* Przycisk zamknięcia jest blokowany podczas trwającego requestu. */}
+              <button
+                className="auth-close-button"
+                disabled={authLoading}
+                onClick={() => setAuthDialogOpen(false)}
+                type="button"
+              >
+                Zamknij
+              </button>
+            </div>
+
+            {/* Krótki opis wyjaśnia, że Google potwierdza tożsamość dla konta aplikacji. */}
+            <p>Użyj konta Google, aby utworzyć lub otworzyć profil w Matka Ziemia Monitor.</p>
+
+            {/* Oficjalny komponent Google zwróci token ID do callbacku po wybraniu konta. */}
+            <GoogleSignIn
+              clientId={GOOGLE_CLIENT_ID}
+              disabled={authLoading}
+              onCredential={handleGoogleCredential}
+              onError={handleGoogleError}
+            />
+
+            {/* Stan requestu i błędy są ogłaszane technologiom asystującym. */}
+            <div aria-live="polite" className={authError ? 'auth-status error' : 'auth-status'}>
+              {authLoading ? 'Trwa bezpieczne logowanie...' : authError}
+            </div>
+          </section>
+        </div>
+      )}
     </main>
   )
 }
