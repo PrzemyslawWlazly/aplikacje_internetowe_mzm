@@ -133,7 +133,7 @@ const mapModes = {
   },
   // Tryb sejsmiczny pobiera dane z USGS przez backend.
   seismic: {
-    label: 'Sejsmiczna swiat',
+    label: 'Zdarzenia sejsmiczne',
     eyebrow: 'Mapa sejsmiczna',
     title: 'Zdarzenia sejsmiczne',
     subtitle: 'Ostatnie trzesienia ziemi z USGS pokazane jako markery na mapie swiata.',
