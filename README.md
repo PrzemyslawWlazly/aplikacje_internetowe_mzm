@@ -1,4 +1,4 @@
-# NieZmoknij
+# NieZmoknij <img width="1280" height="960" alt="hot" src="https://github.com/user-attachments/assets/e8234f1f-aab5-4388-b5cb-95ed9ef3c65a" />
 
 Studencka aplikacja internetowa agregująca i wizualizująca pogodę, trzęsienia ziemi, burze, cyklony oraz katalog wulkanów.
 
