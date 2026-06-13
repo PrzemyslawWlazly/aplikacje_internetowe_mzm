@@ -27,17 +27,13 @@
   gap: 12px; /* Odstęp między znakiem a nazwą. */
 }
 
-/* Kwadratowy znak MZ jest prostym placeholderem logo. */
+/* Znak marki wykorzystuje tę samą pogodową ikonę co słoneczne punkty mapy. */
 .brand-mark {
   width: 44px; /* Stała szerokość stabilizuje układ. */
   height: 44px; /* Stała wysokość tworzy kwadrat. */
-  border-radius: 8px; /* Mały promień pasuje do reszty UI. */
-  display: grid; /* Grid pozwala łatwo wyśrodkować tekst. */
-  place-items: center; /* Tekst MZ trafia dokładnie do środka. */
-  background: #5eead4; /* Turkus jest akcentem dla danych i statusów. */
-  color: #130d2b; /* Ciemny tekst kontrastuje z turkusem. */
-  font-weight: 800; /* Mocna waga wzmacnia znak. */
-  font-size: 14px; /* Rozmiar pasuje do małego logo. */
+  display: block; /* Obraz nie pozostawia dolnej luki charakterystycznej dla inline. */
+  object-fit: contain; /* Całe słoneczko mieści się bez przycinania. */
+  flex: 0 0 44px; /* Długi tekst nazwy nie może ścisnąć znaku. */
 }
 
 /* Nazwa i podtytuł brandu zajmują osobne linie. */
@@ -69,6 +65,12 @@
 /* Przyciski dziedziczą font aplikacji. */
 button {
   font: inherit; /* Dzięki temu button nie wygląda jak domyślny systemowy element. */
+}
+
+/* Zablokowane komendy nie powinny sugerować, że można je obecnie uruchomić. */
+button:disabled {
+  cursor: not-allowed; /* Kursor jasno komunikuje brak dostępnej akcji. */
+  opacity: 0.5; /* Przygaszenie odróżnia stan disabled od aktywnego przycisku. */
 }
 
 /* Wspólny wygląd przycisków panelowych. */
@@ -113,6 +115,11 @@ button {
 /* Opcje przełącznika mają własny padding. */
 .segmented-control button {
   padding: 9px 10px; /* Większy obszar kliknięcia poprawia ergonomię. */
+}
+
+/* Panel warstw pozostaje widoczny w widoku lokalizacji, ale ma drugorzędne znaczenie. */
+.layer-panel.inactive {
+  opacity: 0.62; /* Przygaszenie wskazuje, że użytkownik pracuje poza mapą. */
 }
 
 /* Karta statusu informuje o stanie pobierania danych. */
@@ -232,6 +239,24 @@ button {
   font-size: 14px; /* Kompaktowy rozmiar pasuje do kontrolki profilu. */
 }
 
+/* Teksty profilu układamy pionowo, aby stan sesji był jednoznaczny. */
+.profile-copy {
+  display: grid; /* Grid układa opis sesji nad nazwą konta. */
+  min-width: 0; /* Element może się zwężać bez wypychania przycisku wylogowania. */
+}
+
+/* Pomocniczy opis logowania pozostaje czytelny, ale nie konkuruje z nazwą użytkownika. */
+.profile-copy small {
+  color: #b9acd0; /* Stonowany kolor zachowuje hierarchię tekstu. */
+  font-size: 0.72rem; /* Mały rozmiar pasuje do informacji pomocniczej. */
+  line-height: 1.2; /* Zwarta interlinia utrzymuje niski profil nagłówka. */
+}
+
+/* Nazwa konta zachowuje bezpieczne skracanie w wąskim nagłówku. */
+.profile-copy strong {
+  max-width: 12rem; /* Długie imię lub e-mail nie może zasłonić wylogowania. */
+}
+
 /* Wylogowanie jest spokojną, drugorzędną akcją. */
 .logout-button,
 .auth-close-button {
@@ -334,6 +359,356 @@ button {
   opacity: 0.55; /* Przygaszenie wzmacnia stan disabled. */
 }
 
+/* Prywatny moduł lokalizacji układa formularz nad listą i szczegółami. */
+.locations-workspace {
+  min-width: 0; /* Długie nazwy i wykres nie mogą rozepchnąć głównej siatki. */
+  display: grid; /* Sekcje tworzą pionowy przepływ obszaru roboczego. */
+  gap: 16px; /* Stały odstęp porządkuje formularz, komunikat i dane. */
+}
+
+/* Stan anonimowy jasno oddziela publiczną mapę od funkcji konta. */
+.locations-auth-state {
+  min-height: 420px; /* Komunikat zajmuje stabilną część ekranu roboczego. */
+  display: grid; /* Grid umożliwia zwarte ułożenie treści. */
+  align-content: center; /* Zawartość znajduje się w środku wysokości panelu. */
+  justify-items: start; /* Tekst i przycisk zachowują lewą oś aplikacji. */
+  gap: 12px; /* Odstępy budują czytelną hierarchię. */
+  padding: 40px; /* Treść nie dotyka krawędzi obszaru roboczego. */
+  border-top: 1px solid rgba(255, 255, 255, 0.12); /* Linia oddziela stan od nagłówka. */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12); /* Dolna linia domyka obszar. */
+  background: rgba(14, 8, 28, 0.34); /* Dyskretne tło pasuje do prywatnego widoku. */
+}
+
+/* Nagłówek stanu logowania nie powinien mieć skali głównego tytułu aplikacji. */
+.locations-auth-state h2 {
+  max-width: 620px; /* Ograniczenie długości poprawia czytelność. */
+  margin: 0; /* Usuwamy domyślny margines nagłówka. */
+  color: #ffffff; /* Biały tekst ma najwyższy kontrast. */
+  font-size: 26px; /* Rozmiar odpowiada nagłówkowi panelu narzędziowego. */
+}
+
+/* Opis stanu anonimowego pozostaje spokojnym tekstem pomocniczym. */
+.locations-auth-state p {
+  max-width: 620px; /* Tekst nie rozciąga się przez cały ekran. */
+  margin: 0 0 8px; /* Dolny odstęp oddziela opis od komendy. */
+  color: #cfc3e2; /* Kolor zachowuje hierarchię informacji. */
+  line-height: 1.6; /* Interlinia poprawia czytelność kilku linii. */
+}
+
+/* Główna akcja ma turkusowy akcent wspólny dla danych użytkownika. */
+.primary-action {
+  min-height: 42px; /* Stała wysokość odpowiada innym kontrolkom aplikacji. */
+  padding: 0 16px; /* Poziomy padding daje wygodny obszar kliknięcia. */
+  border: 1px solid #5eead4; /* Ramka wzmacnia główną komendę. */
+  border-radius: 8px; /* Promień pozostaje zgodny z systemem UI. */
+  background: #5eead4; /* Jasny turkus wyróżnia zapis i logowanie. */
+  color: #130d2b; /* Ciemny tekst ma wysoki kontrast. */
+  font-weight: 750; /* Mocniejsza waga wskazuje działanie główne. */
+  cursor: pointer; /* Kursor potwierdza interaktywność. */
+}
+
+/* Formularz jest pełnym narzędziem, a nie dekoracyjną kartą. */
+.location-form {
+  padding: 20px; /* Pola otrzymują równy odstęp od ramki. */
+  display: grid; /* Nagłówek i pola układają się pionowo. */
+  gap: 18px; /* Odstęp oddziela komendę od danych wejściowych. */
+  border: 1px solid rgba(255, 255, 255, 0.12); /* Ramka definiuje granicę formularza. */
+  border-radius: 8px; /* Spójny promień pasuje do pozostałych narzędzi. */
+  background: rgba(255, 255, 255, 0.06); /* Tło odróżnia formularz od strony. */
+}
+
+/* Wspólny nagłówek sekcji rozstawia opis i prawą metrykę lub komendę. */
+.section-heading {
+  display: flex; /* Dwie części stoją obok siebie na szerokim ekranie. */
+  align-items: start; /* Elementy zaczynają się przy górnej krawędzi. */
+  justify-content: space-between; /* Komenda lub licznik trafia do prawej strony. */
+  gap: 16px; /* Odstęp zapobiega kolizji tekstu z kontrolką. */
+}
+
+/* Tytuły modułu lokalizacji mają kompaktową skalę panelową. */
+.section-heading h2 {
+  margin: 4px 0 0; /* Tytuł pozostaje blisko etykiety eyebrow. */
+  color: #ffffff; /* Biały tekst buduje najwyższy poziom hierarchii sekcji. */
+  font-size: 21px; /* Rozmiar pasuje do formularza i listy. */
+  line-height: 1.2; /* Stabilna interlinia obsługuje dłuższe nazwy. */
+}
+
+/* Licznik zapisanych punktów ma format zwartej metryki. */
+.section-heading > strong {
+  min-width: 42px; /* Stała szerokość zapobiega przesuwaniu nagłówka. */
+  min-height: 34px; /* Wysokość stabilizuje licznik. */
+  display: grid; /* Grid ułatwia wyśrodkowanie liczby. */
+  place-items: center; /* Liczba trafia dokładnie do środka. */
+  border: 1px solid rgba(94, 234, 212, 0.42); /* Turkusowa ramka łączy licznik z danymi użytkownika. */
+  border-radius: 8px; /* Promień pozostaje niewielki. */
+  color: #5eead4; /* Akcent wyróżnia liczbę lokalizacji. */
+}
+
+/* Siatka formularza wykorzystuje miejsce bez tworzenia zbyt długich pól. */
+.location-form-grid {
+  display: grid; /* Pola układają się w przewidywalne kolumny. */
+  grid-template-columns: repeat(3, minmax(0, 1fr)); /* Trzy kolumny dobrze wykorzystują szeroki dashboard. */
+  gap: 14px; /* Odstęp rozdziela etykiety i kontrolki. */
+}
+
+/* Wybór gotowego punktu zajmuje cały pierwszy wiersz ponad polami ręcznymi. */
+.weather-point-picker {
+  grid-column: 1 / -1; /* Długa nazwa miasta i kraju otrzymuje pełną szerokość formularza. */
+}
+
+/* Każda etykieta trzyma podpis bezpośrednio nad polem. */
+.location-form label {
+  min-width: 0; /* Pole może się skurczyć w kolumnie grid. */
+  display: grid; /* Podpis i input układają się pionowo. */
+  gap: 7px; /* Mały odstęp wiąże podpis z kontrolką. */
+}
+
+/* Podpisy pól są drugorzędną informacją. */
+.location-form label > span {
+  color: #cfc3e2; /* Jasny fiolet jest czytelny, ale słabszy od wartości. */
+  font-size: 13px; /* Kompaktowy podpis pasuje do narzędziowego formularza. */
+}
+
+/* Inputy otrzymują wspólny wygląd zgodny z ciemnym interfejsem. */
+.location-form input {
+  width: 100%; /* Pole wypełnia swoją kolumnę. */
+  min-width: 0; /* Długi placeholder nie rozpycha gridu. */
+  min-height: 42px; /* Stała wysokość poprawia ergonomię i stabilność. */
+  padding: 9px 11px; /* Tekst nie dotyka ramki. */
+  border: 1px solid rgba(255, 255, 255, 0.16); /* Ramka wskazuje obszar edycji. */
+  border-radius: 6px; /* Input jest nieco bardziej zwarty od panelu. */
+  outline: none; /* Własny focus zastępuje domyślną obwódkę przeglądarki. */
+  background: rgba(8, 4, 18, 0.56); /* Ciemniejsze tło odróżnia pola od formularza. */
+  color: #ffffff; /* Wpisywana wartość ma wysoki kontrast. */
+}
+
+/* Focus pola jest widoczny dla obsługi klawiaturą. */
+.location-form input:focus {
+  border-color: #5eead4; /* Turkusowa ramka pokazuje aktywne pole. */
+  box-shadow: 0 0 0 2px rgba(94, 234, 212, 0.14); /* Delikatny pierścień nie zmienia rozmiaru layoutu. */
+}
+
+/* Dłuższy opis może wykorzystać dwie kolumny formularza. */
+.location-description-field {
+  grid-column: span 2; /* Pole notatki otrzymuje więcej miejsca na tekst. */
+}
+
+/* Obszar komunikatu ma stałą minimalną wysokość, aby layout nie skakał. */
+.locations-message {
+  min-height: 20px; /* Jedna linia błędu ma zawsze zarezerwowane miejsce. */
+  color: #b9a6d3; /* Neutralny komunikat używa koloru metadanych. */
+  font-size: 13px; /* Rozmiar pozostaje dyskretny. */
+}
+
+/* Błąd lokalizacji otrzymuje kolor ostrzegawczy. */
+.locations-message.error {
+  color: #fda4af; /* Róż jest spójny z błędami pozostałych modułów. */
+}
+
+/* Główny układ rozdziela listę i panel historii. */
+.locations-layout {
+  min-width: 0; /* Obie kolumny mogą się poprawnie kurczyć. */
+  display: grid; /* Lista i szczegóły stoją obok siebie. */
+  grid-template-columns: minmax(320px, 0.9fr) minmax(0, 1.4fr); /* Historia otrzymuje więcej miejsca na wykres. */
+  gap: 16px; /* Odstęp wizualnie rozdziela dwa narzędzia. */
+  align-items: start; /* Krótsza lista nie rozciąga się do wysokości wykresu. */
+}
+
+/* Lista lokalizacji jest nieframed layoutem z linią rozpoczynającą sekcję. */
+.saved-locations-list {
+  min-width: 0; /* Długie nazwy nie rozpychają kolumny. */
+  display: grid; /* Nagłówek, puste stany i wiersze układają się pionowo. */
+  gap: 14px; /* Odstęp oddziela nagłówek od rekordów. */
+  padding-top: 18px; /* Treść nie dotyka linii sekcji. */
+  border-top: 1px solid rgba(255, 255, 255, 0.14); /* Linia porządkuje pełną szerokość kolumny. */
+}
+
+/* Puste stany są spokojne i nie udają błędu. */
+.locations-empty {
+  margin: 0; /* Usuwamy domyślne marginesy akapitu. */
+  color: #b9a6d3; /* Kolor metadanych nie konkuruje z zawartością. */
+  font-size: 14px; /* Tekst pozostaje czytelny w kompaktowym panelu. */
+}
+
+/* Wiersze lokalizacji tworzą zwartą listę bez kart zagnieżdżonych w panelu. */
+.location-rows {
+  display: grid; /* Kolejne rekordy układają się pionowo. */
+}
+
+/* Pojedynczy rekord jest oddzielony linią i nie ma dekoracyjnego cienia. */
+.location-row {
+  min-width: 0; /* Rekord może się kurczyć wraz z kolumną. */
+  display: grid; /* Dane i akcje układają się w dwóch wierszach. */
+  gap: 8px; /* Odstęp oddziela wybór od komend. */
+  padding: 12px 0; /* Pionowy padding zapewnia wygodny obszar skanowania. */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Linia wyznacza granicę rekordu. */
+}
+
+/* Wybrany rekord ma turkusową linię po lewej bez zmiany szerokości elementu. */
+.location-row.selected {
+  box-shadow: inset 3px 0 0 #5eead4; /* Wewnętrzny akcent nie przesuwa sąsiednich elementów. */
+  padding-left: 10px; /* Tekst odsuwa się od linii wyboru. */
+}
+
+/* Główna część rekordu jest przyciskiem wybierającym szczegóły. */
+.location-select-button {
+  min-width: 0; /* Tekst może zostać skrócony. */
+  min-height: 44px; /* Stabilna wysokość poprawia ergonomię. */
+  padding: 0; /* Wiersz wykorzystuje padding elementu nadrzędnego. */
+  display: flex; /* Nazwa i temperatura stoją po przeciwnych stronach. */
+  align-items: center; /* Elementy są wyrównane w pionie. */
+  justify-content: space-between; /* Temperatura trafia do prawej krawędzi. */
+  gap: 12px; /* Odstęp chroni długą nazwę przed wartością. */
+  border: 0; /* Rekord nie potrzebuje dodatkowej prostokątnej ramki. */
+  background: transparent; /* Tło listy pozostaje jednolite. */
+  color: #ffffff; /* Dane główne mają wysoki kontrast. */
+  text-align: left; /* Nazwy czytamy od lewej. */
+  cursor: pointer; /* Kursor wskazuje możliwość wyboru. */
+}
+
+/* Nazwa i region tworzą dwuliniowy blok. */
+.location-select-button > span:first-child {
+  min-width: 0; /* Blok może się kurczyć przy temperaturze. */
+  display: grid; /* Nazwa znajduje się nad regionem. */
+  gap: 3px; /* Mały odstęp zachowuje związek tekstów. */
+}
+
+/* Nazwa lokalizacji może zostać skrócona bez łamania wysokości rekordu. */
+.location-select-button strong {
+  overflow: hidden; /* Długi tekst nie wychodzi poza kolumnę. */
+  text-overflow: ellipsis; /* Wielokropek sygnalizuje skrócenie. */
+  white-space: nowrap; /* Jedna linia stabilizuje wysokość. */
+}
+
+/* Region i kraj mają charakter metadanych. */
+.location-select-button small {
+  overflow: hidden; /* Metadane nie rozpychają rekordu. */
+  color: #b9a6d3; /* Spokojny fiolet wskazuje drugi poziom informacji. */
+  text-overflow: ellipsis; /* Długi region otrzymuje wielokropek. */
+  white-space: nowrap; /* Wiersz pozostaje zwarty. */
+}
+
+/* Temperatura jest stałą, prawostronną metryką rekordu. */
+.location-temperature {
+  flex: 0 0 auto; /* Wartość nie kurczy się przy długiej nazwie. */
+  color: #5eead4; /* Turkus podkreśla dane pogodowe użytkownika. */
+  font-weight: 750; /* Mocniejsza waga ułatwia skanowanie listy. */
+  font-size: 13px; /* Rozmiar mieści również tekst „Brak pomiaru”. */
+}
+
+/* Komendy rekordu układają się w zwartym rzędzie. */
+.location-row-actions {
+  display: flex; /* Przyciski stoją obok siebie. */
+  flex-wrap: wrap; /* Na wąskiej kolumnie mogą przejść do drugiej linii. */
+  gap: 7px; /* Niewielki odstęp oddziela komendy. */
+}
+
+/* Pomocnicze akcje są kompaktowe i spokojniejsze od przycisku formularza. */
+.location-row-actions button {
+  min-height: 32px; /* Wysokość pasuje do komend w pojedynczym rekordzie. */
+  padding: 0 9px; /* Krótki tekst zachowuje wygodny obszar kliknięcia. */
+  border: 1px solid rgba(255, 255, 255, 0.14); /* Subtelna ramka oddziela komendy. */
+  border-radius: 6px; /* Mały promień odpowiada kompaktowej skali. */
+  background: rgba(255, 255, 255, 0.05); /* Tło nie konkuruje z wybranym rekordem. */
+  color: #d7c7ef; /* Tekst zachowuje czytelność i hierarchię. */
+  font-size: 12px; /* Komendy mieszczą się w jednym rzędzie. */
+  cursor: pointer; /* Kursor wskazuje interaktywność. */
+}
+
+/* Usuwanie dostaje odrębny kolor semantyczny. */
+.location-row-actions .danger-action {
+  border-color: rgba(251, 113, 133, 0.35); /* Różowa ramka sygnalizuje operację destrukcyjną. */
+  color: #fda4af; /* Tekst wzmacnia ostrzeżenie bez jaskrawego tła. */
+}
+
+/* Panel szczegółów i wykresu jest pojedynczym narzędziem dla aktywnego punktu. */
+.location-details {
+  min-width: 0; /* Wykres nie rozpycha głównego layoutu. */
+  min-height: 440px; /* Stała wysokość zapobiega skokom przy zmianie punktu. */
+  padding: 20px; /* Dane nie dotykają ramki panelu. */
+  display: grid; /* Sekcje szczegółów układają się pionowo. */
+  align-content: start; /* Zawartość zaczyna się od góry. */
+  gap: 18px; /* Odstęp oddziela metryki od historii. */
+  border: 1px solid rgba(255, 255, 255, 0.12); /* Ramka wyznacza panel roboczy. */
+  border-radius: 8px; /* Promień jest zgodny z resztą aplikacji. */
+  background: rgba(14, 8, 28, 0.5); /* Ciemne tło poprawia kontrast wykresu. */
+}
+
+/* Współrzędne są zwartym technicznym opisem punktu. */
+.coordinates {
+  flex: 0 0 auto; /* Wartość nie kurczy się przy nazwie. */
+  color: #5eead4; /* Akcent odróżnia dane geograficzne. */
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; /* Monospace ułatwia porównanie cyfr. */
+  font-size: 12px; /* Kompaktowy rozmiar pasuje do metadanych. */
+}
+
+/* Metryki pogodowe tworzą zwartą siatkę porównawczą. */
+.location-weather-grid {
+  display: grid; /* Dane układają się w stabilne kolumny. */
+  grid-template-columns: repeat(3, minmax(0, 1fr)); /* Sześć wartości tworzy dwa rzędy. */
+  border-top: 1px solid rgba(255, 255, 255, 0.1); /* Górna linia rozpoczyna blok pomiaru. */
+  border-left: 1px solid rgba(255, 255, 255, 0.1); /* Lewa linia domyka siatkę. */
+}
+
+/* Każda metryka jest komórką siatki, a nie osobną kartą. */
+.location-weather-grid > div {
+  min-width: 0; /* Długi opis warunków może się zawinąć. */
+  min-height: 78px; /* Stabilna wysokość utrzymuje równy układ. */
+  padding: 12px; /* Tekst ma odstęp od linii tabeli. */
+  display: grid; /* Etykieta znajduje się nad wartością. */
+  align-content: center; /* Zawartość jest wyśrodkowana w pionie. */
+  gap: 5px; /* Odstęp wiąże etykietę z wartością. */
+  border-right: 1px solid rgba(255, 255, 255, 0.1); /* Pionowa linia oddziela kolumny. */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Pozioma linia oddziela rzędy. */
+}
+
+/* Etykiety metryk mają spokojny kolor. */
+.location-weather-grid span {
+  color: #b9a6d3; /* Kolor metadanych zachowuje hierarchię. */
+  font-size: 12px; /* Mały tekst pasuje do zwartej siatki. */
+}
+
+/* Wartości metryk są czytelne, ale nie przesadnie duże. */
+.location-weather-grid strong {
+  overflow-wrap: anywhere; /* Długi opis warunków nie wychodzi poza komórkę. */
+  color: #ffffff; /* Wartość ma wysoki kontrast. */
+  font-size: 15px; /* Rozmiar umożliwia szybkie skanowanie. */
+}
+
+/* Nagłówek historii rozstawia licznik i czas ostatniego pomiaru. */
+.history-heading {
+  display: flex; /* Obie informacje stoją obok siebie. */
+  align-items: end; /* Licznik i czas wyrównujemy do dolnej krawędzi. */
+  justify-content: space-between; /* Czas trafia na prawą stronę. */
+  gap: 14px; /* Odstęp zapobiega nakładaniu tekstów. */
+  padding-top: 4px; /* Historia jest lekko odsunięta od metryk. */
+}
+
+/* Etykieta i licznik historii tworzą zwarty blok. */
+.history-heading > div {
+  display: flex; /* Etykieta i liczba stoją w jednej linii. */
+  align-items: center; /* Elementy mają wspólną oś pionową. */
+  gap: 9px; /* Odstęp oddziela opis od liczby. */
+}
+
+/* Liczba pomiarów używa koloru danych. */
+.history-heading strong {
+  color: #5eead4; /* Turkus wiąże historię z pogodą lokalizacji. */
+}
+
+/* Czas ostatniego pomiaru pozostaje metadanymi. */
+.history-heading small {
+  color: #b9a6d3; /* Spokojny kolor nie konkuruje z wykresem. */
+  text-align: right; /* Tekst trzyma prawą krawędź panelu. */
+}
+
+/* Kontener wykresu ma stabilny wymiar wymagany przez ResponsiveContainer. */
+.weather-history-chart {
+  width: 100%; /* Wykres wypełnia szerokość panelu. */
+  height: 250px; /* Stała wysokość zapobiega pustemu renderowi Recharts. */
+  min-height: 250px; /* Loading i dane nie zmieniają wysokości panelu. */
+}
+
 /* Karty statystyk tworzą szybki panel podsumowania. */
 .stats-grid {
   display: grid; /* Trzy karty układamy w jednej linii. */
@@ -402,6 +777,553 @@ button {
   color: #f7f2ff; /* Tekst popupu jest jasny. */
 }
 
+/* Dashboard układa wszystkie sekcje w pionowej przestrzeni roboczej. */
+.dashboard-workspace {
+  display: grid; /* Sekcje zachowują przewidywalny układ od góry do dołu. */
+  gap: 16px; /* Stały odstęp oddziela narzędzia, karty i analitykę. */
+  min-width: 0; /* Wykresy i długie nazwy nie mogą rozepchnąć całej aplikacji. */
+}
+
+/* Stan ładowania albo pełnego błędu zajmuje spokojny obszar pod nagłówkiem. */
+.dashboard-state {
+  min-height: 180px; /* Stała wysokość ogranicza skok layoutu podczas lazy loadingu. */
+  display: grid; /* Teksty i akcje układają się pionowo. */
+  place-content: center; /* Komunikat trafia na środek dostępnego obszaru. */
+  gap: 10px; /* Odstęp oddziela opis od akcji. */
+  color: #cfc3e2; /* Tekst jest widoczny, ale spokojniejszy od nagłówka. */
+  text-align: center; /* Wyśrodkowanie pasuje do stanu całego modułu. */
+}
+
+/* Pełny stan błędu otrzymuje delikatną ramkę ostrzegawczą. */
+.dashboard-state-error {
+  border: 1px solid rgba(251, 113, 133, 0.42); /* Różowa ramka sygnalizuje problem requestu. */
+  border-radius: 8px; /* Promień pozostaje zgodny z panelami aplikacji. */
+  background: rgba(251, 113, 133, 0.07); /* Tło jest lekkie, aby komunikat nie dominował ekranu. */
+  padding: 24px; /* Tekst nie dotyka ramki na małym ekranie. */
+}
+
+/* Przyciski Dashboardu używają wspólnego wyglądu poleceń roboczych. */
+.dashboard-workspace button,
+.dashboard-state button {
+  min-height: 38px; /* Stabilna wysokość poprawia wygodę klikania. */
+  padding: 8px 12px; /* Polecenie ma wystarczający obszar interakcji. */
+  border: 1px solid rgba(94, 234, 212, 0.42); /* Turkusowa ramka łączy akcje z akcentem danych. */
+  border-radius: 7px; /* Mały promień pasuje do narzędziowego charakteru widoku. */
+  background: rgba(94, 234, 212, 0.1); /* Tło jest subtelne i nie konkuruje z wartościami. */
+  color: #f7f2ff; /* Jasny tekst zachowuje odpowiedni kontrast. */
+  cursor: pointer; /* Kursor wskazuje dostępne polecenie. */
+}
+
+/* Hover podkreśla interaktywność bez zmiany rozmiaru elementu. */
+.dashboard-workspace button:hover,
+.dashboard-state button:hover {
+  background: rgba(94, 234, 212, 0.18); /* Mocniejszy akcent odpowiada na wskazanie kursorem. */
+}
+
+/* Pasek narzędzi pokazuje źródło danych i ręczne odświeżenie. */
+.dashboard-toolbar {
+  display: flex; /* Metadane i przycisk stoją po przeciwnych stronach. */
+  align-items: center; /* Elementy mają wspólną oś pionową. */
+  justify-content: space-between; /* Akcja pozostaje przy prawej krawędzi. */
+  gap: 16px; /* Odstęp chroni tekst przed zderzeniem z przyciskiem. */
+  padding: 10px 0; /* Pasek jest częścią strony, a nie kolejną kartą. */
+  border-top: 1px solid rgba(255, 255, 255, 0.1); /* Linie oddzielają go od nagłówka. */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Dolna linia zamyka metadane. */
+}
+
+/* Metadane paska układają się w dwóch wierszach. */
+.dashboard-toolbar > div {
+  display: grid; /* Czas i źródło cache zajmują osobne linie. */
+  gap: 3px; /* Mały odstęp utrzymuje związek obu informacji. */
+}
+
+/* Główna informacja paska pozostaje jasna i czytelna. */
+.dashboard-toolbar span {
+  color: #f7f2ff; /* Jasny tekst odpowiada ważności czasu wygenerowania. */
+  font-size: 14px; /* Rozmiar pasuje do zwartego paska. */
+}
+
+/* Informacja o cache ma drugorzędny charakter diagnostyczny. */
+.dashboard-toolbar small {
+  color: #b9a6d3; /* Stonowany fiolet odróżnia metadane od treści. */
+  font-size: 12px; /* Mały tekst nie konkuruje ze statystykami. */
+}
+
+/* Błąd odświeżenia mieści się nad zachowanymi danymi. */
+.dashboard-inline-error {
+  margin: 0; /* Usuwamy domyślne marginesy paragrafu. */
+  padding: 10px 12px; /* Komunikat pozostaje czytelny przy ramce. */
+  border-left: 3px solid #fb7185; /* Pasek szybko wskazuje problem. */
+  background: rgba(251, 113, 133, 0.08); /* Tło nie zasłania reszty Dashboardu. */
+  color: #fda4af; /* Kolor tekstu pozostaje czytelny na fiolecie. */
+}
+
+/* Pięć kart tworzy zwarty rząd najważniejszych metryk. */
+.dashboard-stats-grid {
+  display: grid; /* Grid utrzymuje równe szerokości kart. */
+  grid-template-columns: repeat(5, minmax(0, 1fr)); /* Każda metryka otrzymuje tę samą część ekranu. */
+  gap: 10px; /* Mniejszy odstęp pozwala zmieścić pięć wartości. */
+}
+
+/* Karty Dashboardu są nieco bardziej kompaktowe niż karty głównej mapy. */
+.dashboard-stats-grid .stat-card {
+  min-height: 92px; /* Wysokość mieści dłuższe etykiety bez skakania układu. */
+}
+
+/* Wartości pięciu kart zachowują proporcjonalny rozmiar. */
+.dashboard-stats-grid .stat-card strong {
+  font-size: 25px; /* Liczby są wyraźne, ale mieszczą się w węższych kolumnach. */
+}
+
+/* Główna siatka zestawia wykres i listę zdarzeń w równych kolumnach. */
+.dashboard-main-grid {
+  display: grid; /* Oba panele stoją obok siebie na szerokim ekranie. */
+  grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr); /* Wykres otrzymuje nieco więcej miejsca. */
+  gap: 16px; /* Odstęp oddziela dwa niezależne obszary analityczne. */
+  min-width: 0; /* Recharts może prawidłowo obliczyć szerokość rodzica. */
+}
+
+/* Dolna siatka łączy pogodę użytkownika ze stanem zadań. */
+.dashboard-lower-grid {
+  display: grid; /* Sekcje pozostają obok siebie na desktopie. */
+  grid-template-columns: minmax(0, 1.2fr) minmax(360px, 0.8fr); /* Lokalizacje mają więcej miejsca na nazwy i pogodę. */
+  gap: 16px; /* Odstęp utrzymuje wyraźny podział funkcji. */
+  min-width: 0; /* Długie teksty nie wychodzą poza workspace. */
+}
+
+/* Panel oprawia pojedynczy obszar danych bez tworzenia zagnieżdżonych kart. */
+.dashboard-panel {
+  min-width: 0; /* Zawartość może się poprawnie zwężać. */
+  padding: 18px; /* Tekst i wykres nie dotykają ramki. */
+  border: 1px solid rgba(255, 255, 255, 0.12); /* Delikatna ramka wyznacza panel. */
+  border-radius: 8px; /* Maksymalny zalecany promień zachowuje narzędziowy styl. */
+  background: rgba(15, 7, 31, 0.48); /* Ciemne tło poprawia czytelność danych. */
+}
+
+/* Nagłówek panelu rozstawia opis i opcjonalną akcję. */
+.dashboard-section-heading {
+  min-height: 52px; /* Stała wysokość wyrównuje początki sąsiednich paneli. */
+  display: flex; /* Tytuł i akcja stoją w jednej linii. */
+  align-items: start; /* Elementy zaczynają się od górnej krawędzi. */
+  justify-content: space-between; /* Przycisk trafia na prawą stronę. */
+  gap: 14px; /* Odstęp chroni długi tytuł. */
+  margin-bottom: 12px; /* Dane zaczynają się po czytelnym odstępie. */
+}
+
+/* Tytuł panelu ma rozmiar odpowiedni dla kompaktowego obszaru roboczego. */
+.dashboard-section-heading h2 {
+  margin: 3px 0 0; /* Tytuł jest blisko etykiety kategorii. */
+  color: #ffffff; /* Biały kolor nadaje mu najwyższy kontrast w panelu. */
+  font-size: 19px; /* Rozmiar nie udaje nagłówka strony. */
+  letter-spacing: 0; /* Tekst zachowuje naturalny rytm. */
+}
+
+/* Kontener wykresu ma stabilną wysokość wymaganą przez Recharts. */
+.dashboard-chart {
+  width: 100%; /* Wykres wypełnia szerokość panelu. */
+  height: 270px; /* Wysokość zapewnia czytelne słupki i osie. */
+  min-height: 270px; /* Dane i loading nie zmieniają wymiaru. */
+}
+
+/* Listy zdarzeń i lokalizacji układają rekordy jeden pod drugim. */
+.dashboard-event-list,
+.dashboard-location-list,
+.dashboard-sync-list {
+  display: grid; /* Każdy rekord zajmuje osobny wiersz. */
+  gap: 7px; /* Niewielki odstęp ułatwia skanowanie listy. */
+}
+
+/* Wiersze zdarzeń i lokalizacji wypełniają szerokość panelu. */
+.dashboard-event-list > button,
+.dashboard-location-list > button {
+  width: 100%; /* Cały wiersz stanowi wygodny obszar kliknięcia. */
+  min-height: 54px; /* Stała minimalna wysokość stabilizuje listę. */
+  display: flex; /* Opis i wartość stoją po przeciwnych stronach. */
+  align-items: center; /* Zawartość jest wyśrodkowana pionowo. */
+  justify-content: space-between; /* Magnituda albo pogoda trafia do prawej krawędzi. */
+  gap: 14px; /* Długi opis nie dotyka wartości. */
+  text-align: left; /* Nazwy miejsc czyta się naturalnie od lewej. */
+  border-color: rgba(255, 255, 255, 0.11); /* Rekordy są spokojniejsze od przycisku polecenia. */
+  background: rgba(255, 255, 255, 0.045); /* Lekkie tło oddziela sąsiadujące wiersze. */
+}
+
+/* Tekstowa część wiersza układa nazwę nad czasem albo regionem. */
+.dashboard-event-list button > span,
+.dashboard-location-list button > span {
+  min-width: 0; /* Długi tekst może zostać skrócony. */
+  display: grid; /* Nazwa i metadane zajmują osobne linie. */
+  gap: 4px; /* Niewielki odstęp zachowuje związek danych. */
+}
+
+/* Nazwy zdarzeń i lokalizacji nie mogą wypchnąć prawej kolumny. */
+.dashboard-event-list strong,
+.dashboard-location-list strong {
+  overflow: hidden; /* Nadmiar tekstu pozostaje w granicach wiersza. */
+  text-overflow: ellipsis; /* Wielokropek sygnalizuje skrócenie. */
+  white-space: nowrap; /* Jedna linia utrzymuje stałą wysokość wiersza. */
+  color: #ffffff; /* Nazwa jest najważniejszym tekstem rekordu. */
+}
+
+/* Metadane list mają spokojniejszy kolor. */
+.dashboard-event-list small,
+.dashboard-location-list small,
+.dashboard-sync-row small {
+  color: #b9a6d3; /* Kolor odróżnia szczegóły od głównych wartości. */
+  font-size: 12px; /* Kompaktowy rozmiar pasuje do listy operacyjnej. */
+}
+
+/* Magnituda pozostaje widoczna jako wyróżniona wartość. */
+.dashboard-event-list b {
+  flex: 0 0 auto; /* Wartość nie kurczy się przy długiej nazwie miejsca. */
+  color: #67e8f9; /* Cyjan jest zgodny z markerami sejsmicznymi. */
+}
+
+/* Wartości pogodowe wyrównujemy do prawej strony wiersza. */
+.dashboard-weather-values {
+  flex: 0 0 auto; /* Temperatura zachowuje stabilną szerokość. */
+  justify-items: end; /* Obie linie kończą się przy prawej krawędzi. */
+  text-align: right; /* Tekst wilgotności i chmur jest wyrównany z temperaturą. */
+}
+
+/* Temperatura korzysta z koloru głównego akcentu. */
+.dashboard-weather-values b {
+  color: #5eead4; /* Turkus odpowiada danym pogodowym użytkownika. */
+}
+
+/* Pusty stan nie tworzy dodatkowej karty wewnątrz panelu. */
+.dashboard-empty {
+  margin: 0; /* Usuwamy domyślny margines paragrafu. */
+  padding: 34px 0; /* Zostawiamy miejsce zamiast sztucznej ramki. */
+  color: #b9a6d3; /* Tekst jest spokojny i czytelny. */
+  text-align: center; /* Pusty stan dotyczy całego panelu. */
+}
+
+/* Stan logowania albo braku lokalizacji jest prostym wierszem akcji. */
+.dashboard-login-state {
+  min-height: 132px; /* Panel zachowuje użyteczną wysokość również bez danych. */
+  display: flex; /* Opis i polecenie stoją obok siebie. */
+  align-items: center; /* Zawartość jest wyśrodkowana pionowo. */
+  justify-content: space-between; /* Akcja trafia do prawej strony. */
+  gap: 16px; /* Tekst nie dotyka przycisku. */
+  color: #cfc3e2; /* Opis pozostaje czytelny bez dominowania. */
+}
+
+/* Wiersz synchronizacji pokazuje typ, status oraz liczbę rekordów. */
+.dashboard-sync-row {
+  min-height: 56px; /* Wszystkie zadania mają stabilny wymiar. */
+  display: grid; /* Trzy kolumny wyrównują dane w każdym wierszu. */
+  grid-template-columns: minmax(0, 1fr) auto 34px; /* Nazwa zajmuje resztę miejsca. */
+  align-items: center; /* Elementy są wyśrodkowane pionowo. */
+  gap: 10px; /* Kolumny pozostają czytelnie rozdzielone. */
+  padding: 9px 0; /* Wiersz ma oddech bez dodatkowej karty. */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09); /* Linia rozdziela kolejne zadania. */
+}
+
+/* Ostatni wiersz nie potrzebuje dolnej linii. */
+.dashboard-sync-row:last-child {
+  border-bottom: 0; /* Panel kończy się własną ramką. */
+}
+
+/* Nazwa zadania i czas układają się pionowo. */
+.dashboard-sync-row > span:first-child {
+  min-width: 0; /* Długi tekst może się zwęzić. */
+  display: grid; /* Nazwa stoi nad datą. */
+  gap: 4px; /* Elementy zachowują bliski związek. */
+}
+
+/* Licznik wyników jest wyrównany do prawej. */
+.dashboard-sync-row > b {
+  color: #ffffff; /* Liczba pozostaje czytelna. */
+  text-align: right; /* Wszystkie wartości tworzą równą kolumnę. */
+}
+
+/* Status zadania ma zwarty, stabilny kształt. */
+.dashboard-sync-status {
+  min-width: 86px; /* Różne tłumaczenia nie przesuwają kolumn. */
+  padding: 5px 7px; /* Tekst ma niewielki oddech. */
+  border: 1px solid rgba(255, 255, 255, 0.14); /* Ramka definiuje etykietę statusu. */
+  border-radius: 6px; /* Mały promień pasuje do etykiety. */
+  color: #d7c7ef; /* Domyślny kolor obsługuje stan NEVER. */
+  font-size: 11px; /* Kompaktowy rozmiar mieści dłuższe tłumaczenie. */
+  text-align: center; /* Status jest łatwy do skanowania w kolumnie. */
+}
+
+/* Sukces synchronizacji wykorzystuje turkusowy akcent. */
+.dashboard-sync-status.status-success {
+  border-color: rgba(94, 234, 212, 0.42); /* Zielonkawa ramka oznacza poprawne wykonanie. */
+  color: #5eead4; /* Tekst wzmacnia pozytywny stan. */
+}
+
+/* Błąd synchronizacji wykorzystuje różowy akcent ostrzegawczy. */
+.dashboard-sync-status.status-failed {
+  border-color: rgba(251, 113, 133, 0.5); /* Ramka sygnalizuje problem zadania. */
+  color: #fda4af; /* Tekst ma wysoki kontrast na ciemnym tle. */
+}
+
+/* Trwające zadanie wykorzystuje żółty akcent informacyjny. */
+.dashboard-sync-status.status-running {
+  border-color: rgba(250, 204, 21, 0.5); /* Żółta ramka oznacza proces w toku. */
+  color: #fde047; /* Kolor jest czytelny i odmienny od sukcesu oraz błędu. */
+}
+
+/* Pasek preferencji łączy opis ustawienia z segmentowanym wyborem zakresu. */
+.dashboard-preferences {
+  display: flex; /* Opis i kontrolka stoją w jednej linii. */
+  align-items: center; /* Elementy mają wspólną oś pionową. */
+  justify-content: space-between; /* Kontrolka trafia do prawej krawędzi. */
+  gap: 16px; /* Odstęp chroni tekst przed przyciskami. */
+  padding: 14px 16px; /* Zawartość ma wygodny oddech. */
+  border: 1px solid rgba(255, 255, 255, 0.12); /* Ramka wyznacza ustawienie użytkownika. */
+  border-radius: 8px; /* Promień pozostaje zgodny z systemem UI. */
+  background: rgba(255, 255, 255, 0.045); /* Delikatne tło odróżnia preferencję od statystyk. */
+}
+
+/* Opis preferencji układa tytuł nad informacją o zapisie. */
+.dashboard-preferences > div:first-child {
+  display: grid; /* Dwie linie zachowują stały rytm. */
+  gap: 4px; /* Mały odstęp łączy tytuł z opisem. */
+}
+
+/* Pomocniczy tekst preferencji ma drugorzędny kolor. */
+.dashboard-preferences span {
+  color: #b9a6d3; /* Fioletowa szarość pasuje do metadanych. */
+  font-size: 12px; /* Mały tekst nie konkuruje z kontrolką. */
+}
+
+/* Segmentowany wybór utrzymuje trzy opcje w jednym stabilnym rzędzie. */
+.dashboard-range-control {
+  display: grid; /* Grid zapewnia równe szerokości przycisków. */
+  grid-template-columns: repeat(3, minmax(72px, 1fr)); /* Każdy zakres ma własny segment. */
+  gap: 4px; /* Minimalny odstęp wizualnie łączy przyciski. */
+}
+
+/* Aktywny zakres jest wyraźnie odróżniony od pozostałych opcji. */
+.dashboard-range-control .selected {
+  border-color: #5eead4; /* Turkusowa ramka wskazuje zapisany wybór. */
+  background: rgba(94, 234, 212, 0.22); /* Mocniejsze tło potwierdza aktywną wartość. */
+  color: #ffffff; /* Tekst zachowuje najwyższy kontrast. */
+}
+
+/* Widok tabeli sejsmicznej układa filtry i wyniki w pionie. */
+.seismic-workspace,
+.sync-workspace {
+  display: grid; /* Sekcje mają przewidywalny pionowy przepływ. */
+  gap: 16px; /* Odstęp oddziela kontrolki, status i tabelę. */
+  min-width: 0; /* Tabela nie może rozepchnąć głównej siatki aplikacji. */
+}
+
+/* Formularz filtrów tworzy zwarty pasek roboczy. */
+.seismic-filters {
+  display: grid; /* Każda kontrolka otrzymuje osobną kolumnę. */
+  grid-template-columns: repeat(4, minmax(140px, 1fr)) auto; /* Przycisk zajmuje tylko potrzebną szerokość. */
+  align-items: end; /* Pola i przycisk wyrównujemy do dolnej krawędzi. */
+  gap: 10px; /* Odstęp rozdziela parametry zapytania. */
+  padding: 16px; /* Kontrolki nie dotykają ramki. */
+  border: 1px solid rgba(255, 255, 255, 0.12); /* Ramka definiuje panel filtrów. */
+  border-radius: 8px; /* Promień pasuje do pozostałych narzędzi. */
+  background: rgba(15, 7, 31, 0.48); /* Ciemne tło poprawia czytelność formularza. */
+}
+
+/* Etykieta filtra układa opis nad kontrolką. */
+.seismic-filters label {
+  min-width: 0; /* Pole może się zwęzić bez rozpychania siatki. */
+  display: grid; /* Tekst i input stoją w dwóch wierszach. */
+  gap: 6px; /* Odstęp oddziela etykietę od wartości. */
+}
+
+/* Opisy filtrów używają stylu metadanych. */
+.seismic-filters label > span {
+  color: #b9a6d3; /* Stonowany kolor zachowuje hierarchię. */
+  font-size: 12px; /* Etykieta pozostaje kompaktowa. */
+}
+
+/* Pola filtrów otrzymują wspólny wygląd zgodny z formularzem lokalizacji. */
+.seismic-filters select,
+.seismic-filters input {
+  width: 100%; /* Kontrolka wypełnia przydzieloną kolumnę. */
+  min-height: 42px; /* Stabilna wysokość poprawia ergonomię. */
+  padding: 8px 10px; /* Tekst nie dotyka krawędzi. */
+  border: 1px solid rgba(255, 255, 255, 0.14); /* Ramka odróżnia pole od tła. */
+  border-radius: 7px; /* Promień jest spójny z przyciskami. */
+  background: #140a27; /* Jednolite ciemne tło zapewnia czytelność opcji. */
+  color: #f7f2ff; /* Jasny tekst ma poprawny kontrast. */
+  font: inherit; /* Kontrolki używają fontu aplikacji. */
+}
+
+/* Przycisk formularza ma ten sam akcent co akcje Dashboardu. */
+.seismic-filters > button,
+.seismic-table button,
+.sync-actions button,
+.sync-history-heading button {
+  min-height: 42px; /* Polecenia zachowują stabilny wymiar. */
+  padding: 8px 12px; /* Obszar kliknięcia jest wygodny. */
+  border: 1px solid rgba(94, 234, 212, 0.52); /* Turkus sygnalizuje wykonanie operacji. */
+  border-radius: 7px; /* Mały promień pasuje do narzędziowego interfejsu. */
+  background: rgba(94, 234, 212, 0.12); /* Tło pozostaje spokojne. */
+  color: #ffffff; /* Tekst jest dobrze widoczny. */
+  cursor: pointer; /* Kursor wskazuje interaktywność. */
+}
+
+/* Pasek podsumowania filtrów jest częścią strony, a nie kolejną kartą. */
+.seismic-summary {
+  display: flex; /* Licznik i metadane stoją w jednym wierszu. */
+  align-items: center; /* Elementy mają wspólną oś pionową. */
+  gap: 18px; /* Odstęp rozdziela różne informacje. */
+  padding: 10px 0; /* Pasek ma oddech od sąsiednich sekcji. */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Linia oddziela tabelę. */
+  color: #b9a6d3; /* Metadane są spokojniejsze od licznika. */
+  font-size: 13px; /* Kompaktowy rozmiar pasuje do paska. */
+}
+
+/* Licznik wyników jest najważniejszą informacją paska. */
+.seismic-summary strong {
+  color: #5eead4; /* Turkus wiąże licznik z danymi. */
+  font-size: 16px; /* Większy rozmiar ułatwia szybkie skanowanie. */
+}
+
+/* Kontener tabeli zapewnia przewijanie bez łamania całej strony. */
+.seismic-table-wrap {
+  width: 100%; /* Tabela wykorzystuje całą szerokość widoku. */
+  overflow-x: auto; /* Wąski ekran może przewinąć kolumny poziomo. */
+  border: 1px solid rgba(255, 255, 255, 0.12); /* Ramka wyznacza obszar danych. */
+  border-radius: 8px; /* Promień pasuje do pozostałych paneli. */
+  background: rgba(15, 7, 31, 0.48); /* Tło stabilizuje czytelność wierszy. */
+}
+
+/* Semantyczna tabela zachowuje minimalną szerokość potrzebną kolumnom. */
+.seismic-table {
+  width: 100%; /* Na szerokim ekranie tabela wypełnia kontener. */
+  min-width: 820px; /* Kolumny nie ściskają długich nazw do nieczytelnego formatu. */
+  border-collapse: collapse; /* Linie komórek tworzą spójną siatkę. */
+}
+
+/* Nagłówki i komórki mają wspólny rytm. */
+.seismic-table th,
+.seismic-table td {
+  padding: 12px 14px; /* Dane nie dotykają krawędzi kolumn. */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09); /* Linie rozdzielają rekordy. */
+  text-align: left; /* Tekst czyta się naturalnie od lewej. */
+  vertical-align: middle; /* Wartości są wyrównane w pionie. */
+}
+
+/* Nagłówek tabeli pozostaje stonowany i zwarty. */
+.seismic-table th {
+  color: #b9a6d3; /* Kolor odróżnia etykiety od danych. */
+  font-size: 12px; /* Nagłówki nie dominują tabeli. */
+  font-weight: 650; /* Waga wystarcza do rozpoznania kolumn. */
+  white-space: nowrap; /* Nazwy kolumn pozostają w jednym wierszu. */
+}
+
+/* Dane tabeli zachowują czytelny kontrast. */
+.seismic-table td {
+  color: #e9e1f5; /* Jasny tekst jest czytelny na ciemnym tle. */
+  font-size: 13px; /* Rozmiar mieści więcej rekordów na ekranie. */
+}
+
+/* Kolumna miejsca ogranicza bardzo długie opisy USGS. */
+.seismic-table td:nth-child(2) {
+  max-width: 380px; /* Nazwa nie zabiera całej szerokości tabeli. */
+  overflow: hidden; /* Nadmiar pozostaje w obrębie komórki. */
+  text-overflow: ellipsis; /* Wielokropek wskazuje skrócenie. */
+  white-space: nowrap; /* Jeden wiersz utrzymuje równą wysokość rekordów. */
+}
+
+/* Magnituda wyróżnia się kolorem używanym na mapie. */
+.seismic-table td strong {
+  color: #67e8f9; /* Cyjan łączy tabelę z markerami sejsmicznymi. */
+}
+
+/* Ostatni wiersz nie potrzebuje dolnej linii. */
+.seismic-table tbody tr:last-child td {
+  border-bottom: 0; /* Ramka kontenera zamyka tabelę. */
+}
+
+/* Pusty stan tabeli zajmuje czytelny obszar. */
+.seismic-empty-cell {
+  padding: 42px 16px !important; /* Większy odstęp odróżnia pusty stan od rekordu. */
+  color: #b9a6d3 !important; /* Tekst ma charakter pomocniczy. */
+  text-align: center !important; /* Komunikat dotyczy całej tabeli. */
+}
+
+/* Panel akcji synchronizacji tworzy trzy równorzędne elementy. */
+.sync-actions {
+  display: grid; /* Każde zadanie zajmuje osobną kolumnę. */
+  grid-template-columns: repeat(3, minmax(0, 1fr)); /* Typy synchronizacji mają równą szerokość. */
+  gap: 12px; /* Odstęp rozdziela niezależne komendy. */
+}
+
+/* Pojedyncza akcja łączy opis i przycisk bez zagnieżdżonej karty. */
+.sync-actions article {
+  min-height: 112px; /* Stała wysokość utrzymuje równy rząd. */
+  display: flex; /* Opis i przycisk są rozstawione pionowo. */
+  flex-direction: column; /* Przycisk trafia pod opis. */
+  justify-content: space-between; /* Akcja pozostaje przy dolnej krawędzi. */
+  gap: 14px; /* Odstęp oddziela treść od polecenia. */
+  padding: 16px; /* Zawartość nie dotyka ramki. */
+  border: 1px solid rgba(255, 255, 255, 0.12); /* Ramka definiuje pojedynczy typ zadania. */
+  border-radius: 8px; /* Promień jest zgodny z aplikacją. */
+  background: rgba(255, 255, 255, 0.05); /* Tło odróżnia komendę od strony. */
+}
+
+/* Opis akcji układa nazwę nad krótkim wyjaśnieniem. */
+.sync-actions article > div {
+  display: grid; /* Dwie linie mają przewidywalny układ. */
+  gap: 5px; /* Mały odstęp zachowuje ich związek. */
+}
+
+/* Tekst pomocniczy akcji ma spokojniejszy kolor. */
+.sync-actions article span {
+  color: #b9a6d3; /* Metadane nie konkurują z nazwą zadania. */
+  font-size: 12px; /* Krótki opis pozostaje kompaktowy. */
+}
+
+/* Potwierdzenie przyjęcia zadania używa pozytywnego akcentu. */
+.sync-notice {
+  margin: 0; /* Usuwamy domyślny margines paragrafu. */
+  padding: 10px 12px; /* Tekst ma oddech od paska. */
+  border-left: 3px solid #5eead4; /* Turkus sygnalizuje poprawne dodanie do kolejki. */
+  background: rgba(94, 234, 212, 0.08); /* Delikatne tło zachowuje spokojny charakter. */
+  color: #99f6e4; /* Tekst ma wysoki kontrast. */
+}
+
+/* Nagłówek historii synchronizacji rozstawia tytuł i akcję. */
+.sync-history-heading {
+  display: flex; /* Opis i przycisk stoją obok siebie. */
+  align-items: end; /* Elementy wyrównujemy do dolnej krawędzi. */
+  justify-content: space-between; /* Akcja trafia na prawą stronę. */
+  gap: 16px; /* Odstęp chroni tytuł przed zderzeniem. */
+}
+
+/* Tytuł historii ma rozmiar panelowy. */
+.sync-history-heading h2 {
+  margin: 3px 0 0; /* Tytuł pozostaje blisko etykiety źródła. */
+  font-size: 20px; /* Rozmiar pasuje do sekcji roboczej. */
+}
+
+/* Kolumna błędu ogranicza techniczne komunikaty do jednej linii. */
+.sync-error-cell {
+  max-width: 300px; /* Długi wyjątek nie rozpycha całej tabeli. */
+  overflow: hidden; /* Nadmiar tekstu pozostaje w komórce. */
+  text-overflow: ellipsis; /* Wielokropek sygnalizuje pełny tekst w atrybucie title. */
+  white-space: nowrap; /* Jeden wiersz utrzymuje zwartą historię. */
+}
+
+/* Stan braku uprawnień jasno wyjaśnia ochronę panelu. */
+.sync-access-state {
+  min-height: 220px; /* Komunikat zajmuje stabilny obszar strony. */
+  display: grid; /* Tytuł i opis stoją pionowo. */
+  place-content: center; /* Treść trafia na środek widoku. */
+  gap: 8px; /* Odstęp oddziela dwie linie. */
+  color: #b9a6d3; /* Opis pozostaje spokojny. */
+  text-align: center; /* Stan dotyczy całego modułu. */
+}
+
+/* Główna informacja o uprawnieniach jest wyraźniejsza. */
+.sync-access-state strong {
+  color: #ffffff; /* Biały tekst podkreśla przyczynę braku dostępu. */
+  font-size: 18px; /* Rozmiar jest czytelny bez udawania tytułu strony. */
+}
+
 /* Panel szczegółów prezentuje aktualnie wybrany marker. */
 .details-panel {
   border-radius: 8px; /* Spójny promień narożników. */
@@ -430,6 +1352,17 @@ button {
 /* Błąd dostaje cieplejszy kolor. */
 .panel-note.error {
   color: #fda4af; /* Róż ostrzega, ale pasuje do palety. */
+}
+
+/* Zdjęcie katalogowe wulkanu zachowuje proporcje i nie rozszerza panelu bocznego. */
+.volcano-photo {
+  display: block; /* Obraz zajmuje własny wiersz bez luki charakterystycznej dla elementu inline. */
+  width: 100%; /* Szerokość dopasowuje się do wąskiego panelu szczegółów. */
+  max-height: 210px; /* Limit nie pozwala fotografii wyprzeć danych tekstowych poza ekran. */
+  margin: 0; /* Odstępy zapewnia już właściwość gap kontenera details-panel. */
+  object-fit: cover; /* Zdjęcie wypełnia obszar bez deformowania proporcji. */
+  border: 1px solid rgba(196, 181, 253, 0.22); /* Delikatna ramka oddziela fotografię od tła. */
+  border-radius: 6px; /* Niewielki promień jest zgodny z pozostałymi elementami narzędziowymi. */
 }
 
 /* Lista definicji dobrze pasuje do par etykieta-wartość. */
@@ -503,11 +1436,32 @@ dd {
   }
 
   .nav-list {
-    grid-template-columns: repeat(4, minmax(0, 1fr)); /* Nawigacja mieści się w rzędzie. */
+    grid-template-columns: repeat(3, minmax(0, 1fr)); /* Sześć widoków układa się w dwóch czytelnych rzędach. */
   }
 
   .map-layout {
     grid-template-columns: 1fr; /* Panel szczegółów schodzi pod mapę. */
+  }
+
+  .locations-layout {
+    grid-template-columns: 1fr; /* Lista i historia układają się pionowo na tablecie. */
+  }
+
+  .dashboard-stats-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)); /* Pięć metryk przechodzi do dwóch rzędów. */
+  }
+
+  .dashboard-main-grid,
+  .dashboard-lower-grid {
+    grid-template-columns: 1fr; /* Panele Dashboardu układają się pionowo na tablecie. */
+  }
+
+  .seismic-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr)); /* Filtry przechodzą do dwóch kolumn. */
+  }
+
+  .sync-actions {
+    grid-template-columns: 1fr; /* Komendy administratora układają się pionowo. */
   }
 
   .details-panel {
@@ -523,8 +1477,84 @@ dd {
   }
 
   .nav-list,
-  .stats-grid {
+  .stats-grid,
+  .dashboard-stats-grid {
     grid-template-columns: 1fr; /* Przyciski i statystyki układamy pionowo. */
+  }
+
+  .dashboard-toolbar,
+  .dashboard-login-state,
+  .dashboard-preferences,
+  .sync-history-heading {
+    align-items: stretch; /* Elementy wykorzystują pełną szerokość wąskiego ekranu. */
+    flex-direction: column; /* Tekst i akcja przechodzą do osobnych wierszy. */
+  }
+
+  .dashboard-toolbar button,
+  .dashboard-login-state button,
+  .sync-history-heading button {
+    width: 100%; /* Główne akcje są łatwe do kliknięcia na telefonie. */
+  }
+
+  .dashboard-panel {
+    padding: 15px; /* Mniejszy padding zostawia więcej miejsca na dane. */
+  }
+
+  .dashboard-event-list > button,
+  .dashboard-location-list > button {
+    align-items: start; /* Dwie części wiersza zaczynają się przy górnej krawędzi. */
+    flex-direction: column; /* Pogoda i magnituda schodzą pod nazwę miejsca. */
+  }
+
+  .dashboard-weather-values {
+    justify-items: start; /* Wartości po przejściu do nowego wiersza zaczynają się od lewej. */
+    text-align: left; /* Tekst zachowuje naturalny kierunek czytania. */
+  }
+
+  .dashboard-sync-row {
+    grid-template-columns: minmax(0, 1fr) auto; /* Licznik przechodzi pod status na małym ekranie. */
+  }
+
+  .dashboard-sync-row > b {
+    grid-column: 2; /* Licznik pozostaje w prawej kolumnie. */
+  }
+
+  .dashboard-range-control {
+    width: 100%; /* Segmenty wykorzystują pełną szerokość telefonu. */
+  }
+
+  .seismic-filters {
+    grid-template-columns: 1fr; /* Każdy filtr zajmuje osobny wiersz. */
+  }
+
+  .seismic-summary {
+    align-items: start; /* Metadane zaczynają się przy lewej krawędzi. */
+    flex-direction: column; /* Podsumowanie przechodzi do kilku wierszy. */
+    gap: 6px; /* Mniejszy odstęp zachowuje zwartość. */
+  }
+
+  .location-form-grid {
+    grid-template-columns: 1fr; /* Formularz korzysta z pełnej szerokości telefonu. */
+  }
+
+  .location-description-field {
+    grid-column: auto; /* Opis wraca do jednej kolumny razem z pozostałymi polami. */
+  }
+
+  .section-heading,
+  .history-heading {
+    align-items: start; /* Elementy zaczynają się przy lewej górnej krawędzi. */
+    flex-direction: column; /* Nagłówki i akcje przechodzą do osobnych wierszy. */
+  }
+
+  .location-weather-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)); /* Dwie kolumny utrzymują czytelne metryki na telefonie. */
+  }
+
+  .locations-auth-state,
+  .location-form,
+  .location-details {
+    padding: 18px; /* Mniejszy padding zostawia więcej miejsca na dane. */
   }
 
   .topbar {

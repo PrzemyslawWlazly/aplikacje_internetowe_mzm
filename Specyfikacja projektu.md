@@ -1,10 +1,10 @@
 # Specyfikacja projektu zaliczeniowego
 
-## Matka Ziemia Monitor — agregator danych pogodowych, sejsmicznych i wulkanicznych z cachem oraz dashboardem
+## NieZmoknij - agregator danych pogodowych, sejsmicznych i wulkanicznych z cachem oraz dashboardem
 
 ## 1. Nazwa projektu
 
-**Matka Ziemia Monitor** — studencka aplikacja internetowa do agregowania, przechowywania i wizualizacji danych środowiskowych: pogody, trzęsień ziemi oraz aktywności wulkanicznej.
+**NieZmoknij** - studencka aplikacja internetowa do agregowania, przechowywania i wizualizacji danych środowiskowych: pogody, trzęsień ziemi oraz aktywności wulkanicznej.
 
 ## 2. Charakter projektu
 
@@ -1201,4 +1201,3 @@ Ten temat jest dobry na projekt z aplikacji internetowych, ponieważ pozwala pok
 * ADR z realnymi decyzjami i trade-offami.
 
 Jednocześnie aplikacja może pozostać rozsądnie mała i wykonalna jako projekt jednoosobowy.
-

@@ -103,6 +103,8 @@ if POSTGRES_HOST:
             'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'mzm_password'),
             'HOST': POSTGRES_HOST,
             'PORT': os.getenv('POSTGRES_PORT', '5432'),
+            'CONN_MAX_AGE': 60,  # Krótkie utrzymanie połączeń ogranicza narzut w API i workerze.
+            'CONN_HEALTH_CHECKS': True,  # Django sprawdza trwałe połączenie przed jego ponownym użyciem.
         }
     }
 else:
@@ -179,9 +181,48 @@ SIMPLE_JWT = {
 }
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Matka Ziemia Monitor API',
+    'TITLE': 'NieZmoknij API',
     'DESCRIPTION': 'API do agregowania danych pogodowych, sejsmicznych i wulkanicznych.',
     'VERSION': '0.1.0',
 }
 
 REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
+
+# Django używa Redisa jako współdzielonego cache dla wszystkich procesów backendu i przyszłych workerów Celery.
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',  # Wbudowany backend korzysta z pakietu redis-py.
+        'LOCATION': REDIS_URL,  # Ten sam adres działa lokalnie i w sieci Docker Compose.
+        'KEY_PREFIX': 'niezmoknij',  # Prefiks oddziela klucze projektu od innych aplikacji w tej samej instancji.
+        'TIMEOUT': 300,  # Domyślny TTL wynosi 5 minut, jeśli widok nie poda własnej wartości.
+        'OPTIONS': {
+            'socket_connect_timeout': 2,  # Backend szybko zgłosi problem, gdy Redis jest niedostępny.
+            'socket_timeout': 2,  # Operacja cache nie może blokować requestu przez długi czas.
+        },
+    }
+}
+
+# Aktualna pogoda zapisanej lokalizacji jest świeża wystarczająco długo przez 15 minut.
+LOCATION_WEATHER_CACHE_TTL = int(os.getenv('LOCATION_WEATHER_CACHE_TTL', '900'))
+
+# Redis pełni dwie odrębne role: cache Django oraz broker komunikatów dla Celery.
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', REDIS_URL)  # Domyślnie worker używa tej samej instancji Redisa.
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', REDIS_URL)  # Wynik zadania pomaga w diagnostyce kolejki.
+CELERY_TASK_TRACK_STARTED = True  # Stan STARTED odróżnia zadanie oczekujące od faktycznie wykonywanego.
+CELERY_TASK_TIME_LIMIT = 5 * 60  # Twardy limit pięciu minut chroni worker przed zawieszonym API zewnętrznym.
+CELERY_TASK_SOFT_TIME_LIMIT = 4 * 60  # Miękki limit pozwala Celery zakończyć zadanie i zapisać błąd.
+CELERY_TIMEZONE = 'UTC'  # Harmonogram używa tej samej strefy co baza Django.
+CELERY_BEAT_SCHEDULE = {  # Scheduler cyklicznie zasila bazę bez requestu użytkownika.
+    'sync-earthquakes-every-five-minutes': {
+        'task': 'observations.sync_earthquakes',  # Zdarzenia sejsmiczne zmieniają się dynamicznie.
+        'schedule': 5 * 60,  # Pięć minut odpowiada TTL warstwy sejsmicznej.
+    },
+    'sync-volcano-catalog-every-day': {
+        'task': 'observations.sync_volcanic_events',  # Pełny katalog Smithsonian zmienia się znacznie wolniej niż pogoda.
+        'schedule': 24 * 60 * 60,  # Jedna synchronizacja dziennie ogranicza transfer dużej historii erupcji.
+    },
+    'sync-saved-weather-every-fifteen-minutes': {
+        'task': 'observations.sync_saved_location_weather',  # Historia pogody dotyczy zapisanych lokalizacji.
+        'schedule': 15 * 60,  # Harmonogram jest zgodny z TTL cache pogody.
+    },
+}

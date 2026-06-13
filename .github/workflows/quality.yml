@@ -1,0 +1,79 @@
+# Nazwa pojawia się na liście workflow w repozytorium GitHub.
+name: Kontrola jakości
+
+# Pipeline uruchamia się dla commitów i pull requestów kierowanych do głównych gałęzi.
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+# Dwa niezależne zadania skracają czas oczekiwania i jasno rozdzielają technologie.
+jobs:
+  backend-tests:
+    # Czytelna nazwa jest widoczna jako osobny status commita.
+    name: Testy backendu
+    # Obraz Ubuntu zapewnia Pythona, kompilator i standardowe narzędzia.
+    runs-on: ubuntu-latest
+    # Wszystkie komendy backendu wykonujemy w jego katalogu.
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      # Checkout udostępnia kod repozytorium runnerowi.
+      - name: Pobierz kod
+        uses: actions/checkout@v4
+
+      # Python 3.12 spełnia wymagania Django 6 używanego przez projekt.
+      - name: Skonfiguruj Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      # Instalujemy dokładnie zależności zapisane dla backendu.
+      - name: Zainstaluj zależności
+        run: pip install -r requirements.txt
+
+      # Kontrola migracji wykrywa zmianę modelu bez dołączonego pliku migracji.
+      - name: Sprawdź migracje
+        run: python manage.py makemigrations --check --dry-run
+
+      # Testy korzystają z izolowanej bazy SQLite i zamockowanych źródeł zewnętrznych.
+      - name: Uruchom testy
+        run: python manage.py test
+
+  frontend-quality:
+    # Drugi status grupuje statyczną analizę i próbny build SPA.
+    name: Lint i build frontendu
+    # Frontend również działa na standardowym runnerze Ubuntu.
+    runs-on: ubuntu-latest
+    # Polecenia npm wykonujemy bez powtarzania ścieżki frontend.
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      # Każde zadanie ma własny checkout, ponieważ joby są od siebie izolowane.
+      - name: Pobierz kod
+        uses: actions/checkout@v4
+
+      # Node 22 jest zgodny z Vite 8 i aktualnym plikiem package-lock.
+      - name: Skonfiguruj Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      # npm ci odtwarza deterministyczny zestaw zależności z lockfile.
+      - name: Zainstaluj zależności
+        run: npm ci
+
+      # ESLint wykrywa między innymi błędy hooków Reacta i nieużywane zmienne.
+      - name: Uruchom lint
+        run: npm run lint
+
+      # Produkcyjny build sprawdza importy, JSX i dzielenie modułów.
+      - name: Zbuduj frontend
+        run: npm run build

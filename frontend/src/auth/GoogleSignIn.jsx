@@ -6,6 +6,10 @@ const GOOGLE_SCRIPT_ID = 'google-identity-services'
 
 // Jedna współdzielona obietnica obsługuje wiele renderów komponentu w tej samej karcie.
 let googleScriptPromise = null
+// Zapamiętany Client ID chroni bibliotekę Google przed ponowną inicjalizacją przy każdym otwarciu modalu.
+let initializedClientId = null
+// Wspólny odbiorca przekazuje token do aktualnie zamontowanego komponentu.
+let activeCredentialReceiver = null
 
 // Funkcja ładuje oficjalny skrypt Google Identity Services dopiero wtedy, gdy jest potrzebny.
 function loadGoogleIdentityScript() {
@@ -65,6 +69,19 @@ function GoogleSignIn({ clientId, disabled, onCredential, onError }) {
     credentialCallbackRef.current = onCredential
   }, [onCredential])
 
+  // Efekt podłącza aktualny komponent do jednego globalnego callbacku biblioteki Google.
+  useEffect(() => {
+    // Funkcja pośrednia zawsze odczytuje najnowszy callback rodzica z refa.
+    const receiver = (credential) => credentialCallbackRef.current(credential)
+    // Globalny odbiorca działa również wtedy, gdy Google zostało zainicjalizowane przy poprzednim otwarciu modalu.
+    activeCredentialReceiver = receiver
+
+    // Cleanup usuwa wyłącznie odbiorcę należącego do tego renderu komponentu.
+    return () => {
+      if (activeCredentialReceiver === receiver) activeCredentialReceiver = null
+    }
+  }, [])
+
   // Efekt inicjalizuje bibliotekę po pojawieniu się Client ID i kontenera.
   useEffect(() => {
     // Flaga chroni przed modyfikacją komponentu po jego zamknięciu.
@@ -82,13 +99,18 @@ function GoogleSignIn({ clientId, disabled, onCredential, onError }) {
         if (!active || !buttonContainerRef.current) return
         // Czyścimy kontener, aby przy ponownym otwarciu nie powielać przycisków.
         buttonContainerRef.current.replaceChildren()
-        // Inicjalizacja ustawia odbiorcę tokenu oraz wyłącza automatyczny wybór konta.
-        window.google.accounts.id.initialize({
-          client_id: clientId,
-          callback: (response) => credentialCallbackRef.current(response.credential),
-          auto_select: false,
-          cancel_on_tap_outside: true,
-        })
+        // Inicjalizujemy klienta tylko raz dla danego Client ID, również po ponownym otwarciu modalu.
+        if (initializedClientId !== clientId) {
+          // Inicjalizacja ustawia wspólny odbiornik tokenu oraz wyłącza automatyczny wybór konta.
+          window.google.accounts.id.initialize({
+            client_id: clientId,
+            callback: (response) => activeCredentialReceiver?.(response.credential),
+            auto_select: false,
+            cancel_on_tap_outside: true,
+          })
+          // Zapamiętujemy konfigurację, aby następny modal tylko wyrenderował przycisk.
+          initializedClientId = clientId
+        }
         // Oficjalny renderer zapewnia zgodność przycisku z zasadami marki Google.
         window.google.accounts.id.renderButton(buttonContainerRef.current, {
           type: 'standard',

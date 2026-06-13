@@ -1,5 +1,5 @@
 // Stały klucz zapobiega literówkom przy odczycie i zapisie sesji w localStorage.
-const AUTH_STORAGE_KEY = 'mzm-auth-session'
+const AUTH_STORAGE_KEY = 'niezmoknij-auth-session'
 
 // Funkcja odczytuje poprzednią sesję po odświeżeniu karty przeglądarki.
 export function readAuthSession() {

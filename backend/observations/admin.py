@@ -30,6 +30,8 @@ class WeatherSnapshotAdmin(admin.ModelAdmin):
         'humidity',  # Wilgotność z API.
         'pressure',  # Ciśnienie z API.
         'wind_speed',  # Prędkość wiatru z API.
+        'cloud_cover',  # Zachmurzenie uzupełnia zestaw danych pogodowych.
+        'weather_code',  # Kod WMO pomaga diagnozować opis warunków.
         'source',  # Źródło danych.
         'measured_at',  # Czas pomiaru.
     )
@@ -48,11 +50,20 @@ class EarthquakeEventAdmin(admin.ModelAdmin):
 
 @admin.register(VolcanicEvent)
 class VolcanicEventAdmin(admin.ModelAdmin):
-    """Ustawienia listy zdarzeń wulkanicznych w panelu admina."""
+    """Ustawienia listy katalogu wulkanów w panelu admina."""
 
-    list_display = ('external_id', 'title', 'volcano_name', 'region', 'event_time', 'source', 'status')  # Kolumny listy.
-    list_filter = ('source', 'region', 'status', 'event_time')  # Filtry pasują do przeglądania zdarzeń.
-    search_fields = ('external_id', 'title', 'volcano_name', 'region')  # Szukanie obejmuje nazwę i region.
+    list_display = (  # Kolumny pokazują najważniejsze dane katalogowe i erupcyjne.
+        'external_id',  # Oficjalny numer Smithsonian GVP.
+        'volcano_name',  # Podstawowa nazwa wulkanu.
+        'country',  # Kraj ułatwia szybkie rozpoznanie.
+        'volcano_type',  # Typ morfologiczny wulkanu.
+        'last_eruption_year',  # Rok ostatniej znanej erupcji.
+        'vei',  # VEI ostatniej erupcji, jeśli jest znane.
+        'max_vei',  # Najwyższe VEI w historii katalogowej.
+        'source',  # Jawne źródło danych.
+    )
+    list_filter = ('source', 'country', 'region', 'volcano_type', 'max_vei')  # Filtry odpowiadają polom katalogu.
+    search_fields = ('external_id', 'title', 'volcano_name', 'country', 'region')  # Szukanie obejmuje nazwę i położenie.
 
 
 @admin.register(SyncJob)

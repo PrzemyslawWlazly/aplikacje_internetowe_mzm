@@ -6,7 +6,7 @@ Projekt korzysta z Google Identity Services do potwierdzenia tożsamości użytk
 
 1. Otwórz [tworzenie projektu Google Cloud](https://console.cloud.google.com/projectcreate).
 2. Zaloguj się na konto Google.
-3. Ustaw nazwę projektu, na przykład `Matka Ziemia Monitor`.
+3. Ustaw nazwę projektu, na przykład `NieZmoknij`.
 4. Kliknij `Create`.
 5. Po utworzeniu projektu wybierz go w górnym selektorze Google Cloud.
 
@@ -14,7 +14,7 @@ Projekt korzysta z Google Identity Services do potwierdzenia tożsamości użytk
 
 1. Otwórz [Google Auth Platform - Branding](https://console.cloud.google.com/auth/branding).
 2. Jeśli pojawi się przycisk `Get started`, uruchom konfigurację.
-3. Ustaw nazwę aplikacji `Matka Ziemia Monitor`.
+3. Ustaw nazwę aplikacji `NieZmoknij`.
 4. Wybierz adres e-mail pomocy technicznej.
 5. Podaj własny adres w sekcji danych kontaktowych dewelopera.
 6. Na etapie lokalnym logo, domena produkcyjna, polityka prywatności i regulamin mogą pozostać nieuzupełnione, jeśli konsola na to pozwala.
@@ -32,7 +32,7 @@ Projekt korzysta z Google Identity Services do potwierdzenia tożsamości użytk
 1. Otwórz [Google Auth Platform - Clients](https://console.cloud.google.com/auth/clients).
 2. Kliknij `Create client`.
 3. Jako `Application type` wybierz `Web application`.
-4. Nazwij klienta, na przykład `Matka Ziemia Monitor - lokalnie`.
+4. Nazwij klienta, na przykład `NieZmoknij - lokalnie`.
 5. W `Authorized JavaScript origins` dodaj:
 
 ```text

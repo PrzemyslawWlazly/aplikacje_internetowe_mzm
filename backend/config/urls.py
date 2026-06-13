@@ -18,10 +18,13 @@ from django.contrib import admin  # Admin Django pozwala podejrzeć dane zapisan
 from django.urls import include, path  # include podpina adresy z aplikacji, a path definiuje pojedynczą trasę.
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView  # Widoki generują dokumentację OpenAPI.
 
+from core.views import health  # Healthcheck sprawdza bazę i Redis przed startem zależnych usług.
+
 urlpatterns = [  # Główna lista tras całego backendu.
     path('admin/', admin.site.urls),  # Panel administracyjny Django.
     path('api/auth/', include('accounts.urls')),  # Logowanie Google, profil i odświeżanie lokalnego JWT.
     path('api/', include('observations.urls')),  # Publiczne endpointy danych środowiskowych.
+    path('api/health/', health, name='health'),  # Publiczny stan backendu, PostgreSQL i Redisa.
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),  # Surowy schemat OpenAPI w JSON/YAML.
     path(
         'api/docs/',

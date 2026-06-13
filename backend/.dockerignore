@@ -1,0 +1,17 @@
+# Lokalne środowisko Pythona nie powinno trafiać do obrazu.
+.venv/
+
+# Bazy i pliki uruchomieniowe powstają osobno w każdym środowisku.
+db.sqlite3
+*.sqlite3
+*.pyc
+__pycache__/
+
+# Metadane edytora i systemu kontroli wersji nie są potrzebne aplikacji.
+.git/
+.idea/
+.vscode/
+
+# Raporty testów nie należą do obrazu wykonawczego.
+.coverage
+htmlcov/

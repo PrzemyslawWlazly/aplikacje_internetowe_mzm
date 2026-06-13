@@ -5,7 +5,7 @@ from django.test import override_settings  # Dekorator ustawia testowy Google Cl
 from rest_framework import status  # Nazwane statusy HTTP poprawiają czytelność asercji.
 from rest_framework.test import APITestCase  # Klasa udostępnia klienta do testowania endpointów DRF.
 
-from .models import GoogleAccount  # Model pozwala sprawdzić, czy powiązanie zostało zapisane.
+from .models import GoogleAccount, UserPreference  # Modele pozwalają sprawdzić konto i trwałe preferencje.
 
 
 @override_settings(GOOGLE_OAUTH_CLIENT_ID='test-client.apps.googleusercontent.com')
@@ -39,6 +39,10 @@ class GoogleLoginTests(APITestCase):
         self.assertIn('refresh', response.data)
         # Frontend powinien od razu otrzymać adres zalogowanego użytkownika.
         self.assertEqual(response.data['user']['email'], 'student@example.com')
+        # Nowe konto otrzymuje domyślny zakres jednej doby.
+        self.assertEqual(response.data['user']['preferences']['dashboard_range_hours'], 24)
+        # Zwykły użytkownik nie powinien otrzymać uprawnień panelu synchronizacji.
+        self.assertFalse(response.data['user']['is_staff'])
         # Baza powinna zawierać dokładnie jednego użytkownika Django.
         self.assertEqual(get_user_model().objects.count(), 1)
         # Baza powinna zawierać dokładnie jedno trwałe powiązanie Google.
@@ -107,3 +111,47 @@ class GoogleLoginTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # Profil powinien należeć do właśnie zalogowanego użytkownika.
         self.assertEqual(response.data['user']['email'], 'student@example.com')
+
+    def test_authenticated_user_can_update_dashboard_range_preference(self):
+        # Tworzymy zwykłe konto i uwierzytelniamy klienta bez zależności od Google.
+        user = get_user_model().objects.create_user(
+            username='preference-user',
+            email='preference@example.com',
+            password='test-password-123',
+        )
+        # force_authenticate skupia test na ochronie i walidacji endpointu preferencji.
+        self.client.force_authenticate(user=user)
+
+        # Zapisujemy tygodniowy zakres opisany w specyfikacji.
+        response = self.client.patch(
+            '/api/auth/preferences/',
+            {'dashboard_range_hours': 168},
+            format='json',
+        )
+
+        # Poprawna wartość powinna zostać przyjęta.
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # Odpowiedź potwierdza zapisany zakres.
+        self.assertEqual(response.data['dashboard_range_hours'], 168)
+        # Relacyjna baza przechowuje preferencję po zakończeniu requestu.
+        self.assertEqual(UserPreference.objects.get(user=user).dashboard_range_hours, 168)
+
+    def test_preference_endpoint_rejects_unsupported_range(self):
+        # Uwierzytelniamy użytkownika posiadającego własny rekord ustawień.
+        user = get_user_model().objects.create_user(
+            username='invalid-preference-user',
+            email='invalid-preference@example.com',
+            password='test-password-123',
+        )
+        # Klient działa jako właściciel preferencji.
+        self.client.force_authenticate(user=user)
+
+        # Zakres 48 godzin nie należy do listy 24, 168, 720.
+        response = self.client.patch(
+            '/api/auth/preferences/',
+            {'dashboard_range_hours': 48},
+            format='json',
+        )
+
+        # Serializer ModelChoice powinien zwrócić błąd walidacji.
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

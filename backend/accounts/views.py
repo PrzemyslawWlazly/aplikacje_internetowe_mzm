@@ -11,11 +11,12 @@ from rest_framework.response import Response  # Response serializuje słownik do
 from rest_framework.views import APIView  # APIView jest bazą dla endpointów Django REST Framework.
 from rest_framework_simplejwt.tokens import RefreshToken  # SimpleJWT tworzy token dostępu i odświeżania.
 
-from .models import GoogleAccount  # Model przechowuje stabilne powiązanie z identyfikatorem Google.
+from .models import GoogleAccount, UserPreference  # Modele przechowują konto Google i preferencje interfejsu.
 from .serializers import (  # Importujemy serializery wejścia i odpowiedzi dla dokumentacji API.
     CurrentUserResponseSerializer,
     GoogleCredentialSerializer,
     GoogleLoginResponseSerializer,
+    UserPreferenceSerializer,
 )
 
 
@@ -24,6 +25,8 @@ def serialize_user(user):
 
     # Relacja może nie istnieć dla kont utworzonych lokalnie przez panel administracyjny.
     google_account = getattr(user, 'google_account', None)
+    # get_or_create obsługuje również konta administratorów utworzone przed dodaniem modelu preferencji.
+    preferences, _ = UserPreference.objects.get_or_create(user=user)
     # Zwracamy tylko dane potrzebne interfejsowi, bez haseł i uprawnień administracyjnych.
     return {
         'id': user.pk,  # Identyfikator przyda się później przy zasobach należących do użytkownika.
@@ -31,6 +34,8 @@ def serialize_user(user):
         'first_name': user.first_name,  # Imię wyświetlimy w nagłówku aplikacji.
         'last_name': user.last_name,  # Nazwisko może uzupełnić nazwę profilu.
         'picture_url': google_account.picture_url if google_account else '',  # Zdjęcie jest opcjonalne.
+        'is_staff': user.is_staff,  # Frontend wykorzystuje flagę wyłącznie do sterowania widocznością panelu.
+        'preferences': UserPreferenceSerializer(preferences).data,  # Ustawienie pochodzi z relacyjnej bazy.
     }
 
 
@@ -195,3 +200,40 @@ class CurrentUserView(APIView):
     def get(self, request):
         # request.user został wcześniej odtworzony przez JWTAuthentication z ustawień DRF.
         return Response({'user': serialize_user(request.user)})
+
+
+class UserPreferenceView(APIView):
+    """Udostępnia odczyt i zmianę preferencji bieżącego użytkownika."""
+
+    permission_classes = (IsAuthenticated,)  # Ustawienia zawsze należą do użytkownika wynikającego z JWT.
+
+    def get_object(self, user):
+        # Leniwe utworzenie zapewnia zgodność z kontami powstałymi przed nową migracją.
+        preferences, _ = UserPreference.objects.get_or_create(user=user)
+        # Zwracamy rekord należący wyłącznie do wskazanego użytkownika.
+        return preferences
+
+    @extend_schema(
+        responses={200: UserPreferenceSerializer},  # Swagger pokazuje aktualny zakres i czas zmiany.
+        summary='Preferencje bieżącego użytkownika',
+    )
+    def get(self, request):
+        # Serializer zwraca tylko bezpieczne pola ustawień interfejsu.
+        return Response(UserPreferenceSerializer(self.get_object(request.user)).data)
+
+    @extend_schema(
+        request=UserPreferenceSerializer,  # PATCH przyjmuje ten sam ograniczony zestaw pól.
+        responses={200: UserPreferenceSerializer},  # Odpowiedź potwierdza wartość zapisaną w bazie.
+        summary='Zmiana preferencji bieżącego użytkownika',
+    )
+    def patch(self, request):
+        # Pobieramy rekord właściciela bez możliwości podania user_id przez klienta.
+        preferences = self.get_object(request.user)
+        # partial pozwala w przyszłości aktualizować pojedyncze ustawienia niezależnie.
+        serializer = UserPreferenceSerializer(preferences, data=request.data, partial=True)
+        # Niepoprawna wartość spoza 24, 168 i 720 daje standardową odpowiedź 400.
+        serializer.is_valid(raise_exception=True)
+        # Zwalidowana preferencja zostaje trwale zapisana w PostgreSQL.
+        serializer.save()
+        # Zwracamy aktualny stan rekordu po zapisie.
+        return Response(serializer.data)

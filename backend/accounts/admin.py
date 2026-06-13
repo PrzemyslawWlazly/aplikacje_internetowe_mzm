@@ -1,6 +1,6 @@
 from django.contrib import admin  # Importujemy mechanizm panelu administracyjnego Django.
 
-from .models import GoogleAccount  # Importujemy model, który chcemy oglądać w panelu admina.
+from .models import GoogleAccount, UserPreference  # Importujemy konto Google i preferencje użytkownika.
 
 
 @admin.register(GoogleAccount)
@@ -22,3 +22,12 @@ class GoogleAccountAdmin(admin.ModelAdmin):
         'created_at',  # Data utworzenia jest wyliczana automatycznie.
         'updated_at',  # Data aktualizacji jest wyliczana automatycznie.
     )
+
+
+@admin.register(UserPreference)
+class UserPreferenceAdmin(admin.ModelAdmin):
+    """Pokazuje zakres Dashboardu zapisany dla każdego użytkownika."""
+
+    list_display = ('user', 'dashboard_range_hours', 'updated_at')  # Lista prezentuje właściciela i aktualną wartość.
+    list_filter = ('dashboard_range_hours',)  # Filtr pozwala szybko porównać używane zakresy.
+    search_fields = ('user__username', 'user__email')  # Wyszukiwanie działa po technicznej nazwie i e-mailu.

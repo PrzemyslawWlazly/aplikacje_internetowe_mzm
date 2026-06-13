@@ -10,7 +10,7 @@ Zaakceptowano.
 
 ## Decyzja
 
-W projekcie **Matka Ziemia Monitor** zostanie użyty następujący stos technologiczny:
+W projekcie **NieZmoknij** zostanie użyty następujący stos technologiczny:
 
 - **Django** jako backend aplikacji,
 - **Django REST Framework** jako warstwa API,
@@ -22,7 +22,7 @@ W projekcie **Matka Ziemia Monitor** zostanie użyty następujący stos technolo
 
 ## Kontekst
 
-Projekt **Matka Ziemia Monitor** jest aplikacją internetową tworzoną w ramach przedmiotu *Projektowanie Aplikacji Internetowych*.
+Projekt **NieZmoknij** jest aplikacją internetową tworzoną w ramach przedmiotu *Projektowanie Aplikacji Internetowych*.
 
 Aplikacja ma agregować i prezentować dane środowiskowe, w szczególności:
 

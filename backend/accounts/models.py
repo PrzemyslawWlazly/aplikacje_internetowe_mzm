@@ -38,3 +38,34 @@ class GoogleAccount(models.Model):
     def __str__(self):
         # Czytelny opis ułatwia rozpoznanie rekordu podczas pracy w panelu Django.
         return f'{self.email} ({self.subject})'
+
+
+class UserPreference(models.Model):
+    """Przechowuje proste ustawienia interfejsu należące do jednego użytkownika."""
+
+    class DashboardRange(models.IntegerChoices):
+        """Dozwolone zakresy czasu są ograniczone do opcji opisanych w specyfikacji."""
+
+        DAY = 24, '24 godziny'  # Krótki zakres pokazuje najświeższe zdarzenia.
+        WEEK = 168, '7 dni'  # Tydzień daje szerszy obraz aktywności sejsmicznej.
+        MONTH = 720, '30 dni'  # Miesiąc odpowiada maksymalnemu zakresowi publicznego API.
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,  # Preferencje należą do aktywnego modelu użytkownika Django.
+        on_delete=models.CASCADE,  # Usunięcie konta usuwa również jego ustawienia.
+        related_name='preferences',  # Relacja pozwala użyć zapisu user.preferences.
+    )
+    dashboard_range_hours = models.PositiveSmallIntegerField(
+        choices=DashboardRange.choices,  # Baza i serializer przyjmują tylko trzy świadomie wybrane wartości.
+        default=DashboardRange.DAY,  # Nowe konto zaczyna od najczęściej używanego zakresu 24 godzin.
+    )
+    created_at = models.DateTimeField(auto_now_add=True)  # Czas utworzenia pomaga pokazać trwałość rekordu.
+    updated_at = models.DateTimeField(auto_now=True)  # Zmiana zakresu aktualizuje znacznik automatycznie.
+
+    class Meta:
+        verbose_name = 'preferencje użytkownika'  # Polska nazwa jest widoczna w panelu Django.
+        verbose_name_plural = 'preferencje użytkowników'  # Liczba mnoga opisuje tabelę administracyjną.
+
+    def __str__(self):
+        # Opis łączy właściciela z aktualnie wybranym zakresem.
+        return f'{self.user}: {self.dashboard_range_hours} h'

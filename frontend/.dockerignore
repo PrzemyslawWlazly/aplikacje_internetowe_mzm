@@ -1,0 +1,15 @@
+# Zależności są instalowane wewnątrz obrazu na podstawie package-lock.json.
+node_modules/
+
+# Lokalny build powstaje ponownie wewnątrz właściwego środowiska.
+dist/
+
+# Pliki edytora i systemu kontroli wersji nie są potrzebne w kontenerze.
+.git/
+.idea/
+.vscode/
+
+# Lokalne logi nie powinny zwiększać kontekstu budowania.
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

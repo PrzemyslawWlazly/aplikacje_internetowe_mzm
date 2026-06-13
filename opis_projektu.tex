@@ -1,0 +1,485 @@
+% Dokument używa klasy extarticle, ponieważ standardowy article nie obsługuje czcionki 14 pt.
+\documentclass[14pt,a5paper,oneside]{extarticle}
+
+% Kodowanie T1 poprawia dzielenie i kopiowanie polskich słów z pliku PDF.
+\usepackage[T1]{fontenc}
+% UTF-8 pozwala pisać polskie znaki bez specjalnych komend.
+\usepackage[utf8]{inputenc}
+% Język polski ustawia poprawne nazwy spisu treści i reguły dzielenia wyrazów.
+\usepackage[polish]{babel}
+% Latin Modern jest czytelną czcionką ekranową zgodną z kodowaniem T1.
+\usepackage{lmodern}
+% Geometry ustawia bezpieczne marginesy A5, aby czytnik nie ucinał prawej strony.
+\usepackage[
+  a5paper,
+  inner=13mm,
+  outer=13mm,
+  top=14mm,
+  bottom=16mm,
+  headheight=16pt,
+  includeheadfoot
+]{geometry}
+% Microtype delikatnie poprawia skład i zmniejsza ryzyko wychodzenia tekstu poza margines.
+\usepackage{microtype}
+% Setspace pozwala ustawić wygodną interlinię dla ekranu czytnika.
+\usepackage{setspace}
+% Enumitem zmniejsza zbyt duże odstępy list w małym formacie A5.
+\usepackage{enumitem}
+% Xcolor udostępnia spokojny kolor linków.
+\usepackage{xcolor}
+% Xurl pozwala łamać długie adresy internetowe w dowolnym bezpiecznym miejscu.
+\usepackage{xurl}
+% Hyperref tworzy klikalny spis treści i zakładki widoczne w czytnikach Kindle.
+\usepackage[
+  unicode=true,
+  bookmarks=true,
+  bookmarksopen=true,
+  bookmarksnumbered=true,
+  colorlinks=true,
+  linkcolor=black,
+  urlcolor=blue!55!black,
+  pdfborder={0 0 0}
+]{hyperref}
+% Fancyhdr dodaje krótki nagłówek oraz numer strony.
+\usepackage{fancyhdr}
+
+% Metadane pomagają bibliotece czytnika rozpoznać dokument.
+\hypersetup{
+  pdftitle={NieZmoknij - opis projektu},
+  pdfauthor={Projekt studencki PAI},
+  pdfsubject={Budowa edukacyjnej aplikacji internetowej},
+  pdfkeywords={Django, React, PostgreSQL, Redis, Celery, Leaflet, API}
+}
+
+% Większa tolerancja składu chroni tekst przed wyjściem poza prawy margines.
+\setlength{\emergencystretch}{3em}
+% Sloppy jest świadomym zabezpieczeniem małej strony A5 przed przepełnionymi wierszami.
+\sloppy
+% Interlinia 1.08 zachowuje czytelność bez nadmiernego wydłużania dokumentu.
+\setstretch{1.08}
+% Listy są zwarte, ale nadal czytelne.
+\setlist{itemsep=3pt, topsep=5pt, leftmargin=6mm}
+% Spis treści obejmuje sekcje i podsekcje.
+\setcounter{tocdepth}{2}
+% Numery obejmują poziom podsekcji.
+\setcounter{secnumdepth}{2}
+% Adresy URL używają tej samej czytelnej rodziny pisma.
+\urlstyle{same}
+
+% Nagłówek jest krótki, aby mieścił się na stronie A5.
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{NieZmoknij}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.3pt}
+
+% Polecenie wyróżnia angielski termin techniczny, po którym pojawia się polskie wyjaśnienie.
+\newcommand{\term}[1]{\textbf{\textit{#1}}}
+% Polecenie formatuje krótkie nazwy plików i endpointów bez ryzyka złamania składni.
+\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
+
+\begin{document}
+
+% Strona tytułowa nie ma nagłówka, aby pozostała spokojna i czytelna.
+\begin{titlepage}
+  \thispagestyle{empty}
+  \centering
+  \vspace*{18mm}
+  {\LARGE\bfseries NieZmoknij\par}
+  \vspace{5mm}
+  {\Large Opis budowy aplikacji internetowej\par}
+  \vspace{13mm}
+  {\large Materiał edukacyjny dla ucznia\\Projektowania Aplikacji Internetowych\par}
+  \vfill
+  {\large Wersja: 13 czerwca 2026 r.\par}
+\end{titlepage}
+
+% Spis treści jest zwykłą stroną PDF i jednocześnie tworzy zakładki dla czytnika.
+\tableofcontents
+\clearpage
+
+\section{Co budujemy}
+
+NieZmoknij jest aplikacją internetową zbierającą dane o pogodzie,
+trzęsieniach ziemi, burzach, cyklonach i wulkanach. Użytkownik ogląda te dane
+na mapie, może zapisać własne lokalizacje i zobaczyć historię pogody.
+Administrator może ręcznie uruchamiać pobieranie danych oraz sprawdzać błędy.
+
+Projekt jest edukacyjny. Nie zastępuje systemu ostrzegania ani komunikatów
+służb państwowych. Jego głównym celem jest pokazanie, jak współpracują różne
+części nowoczesnej aplikacji.
+
+\subsection{Najważniejsze pojęcia}
+
+\term{Frontend} to część widoczna w przeglądarce. Rysuje mapę, formularze,
+tabele i wykresy.
+
+\term{Backend} to część serwerowa. Przyjmuje żądania, sprawdza uprawnienia,
+pobiera dane z zewnętrznych źródeł i rozmawia z bazą danych.
+
+\term{API}, czyli \textit{Application Programming Interface}, jest umową
+między programami. Określa adresy żądań i format odpowiedzi.
+
+\term{Database} to trwała baza danych. Trwała oznacza, że dane nie znikają
+po odświeżeniu strony albo ponownym uruchomieniu przeglądarki.
+
+\term{Container} to odizolowane środowisko procesu. Kontener zawiera program
+i potrzebne mu zależności, dzięki czemu projekt łatwiej uruchomić na innym
+komputerze.
+
+\section{Jak projekt powstawał}
+
+\subsection{Szkielet i podział odpowiedzialności}
+
+Na początku projekt został podzielony na katalog \code{frontend} oraz
+\code{backend}. Ten podział jest ważny: interfejs nie powinien samodzielnie
+łączyć się z bazą danych, a backend nie powinien rysować mapy w przeglądarce.
+
+Zostały wybrane:
+
+\begin{itemize}
+  \item React i Vite dla interfejsu,
+  \item Django i Django REST Framework dla API,
+  \item PostgreSQL dla trwałych danych,
+  \item Redis dla szybkiego cache i kolejki,
+  \item Celery dla zadań wykonywanych w tle,
+  \item Docker Compose do wspólnego uruchamiania usług.
+\end{itemize}
+
+\subsection{Najpierw modele danych}
+
+\term{Model} opisuje strukturę informacji w bazie. Przykładowo
+\code{SavedLocation} przechowuje nazwę, kraj i współrzędne. Każda lokalizacja
+ma właściciela. \code{WeatherSnapshot} przechowuje pomiar pogody i wskazuje
+lokalizację przez \term{foreign key}, czyli klucz obcy.
+
+Najważniejsza relacja wygląda tak:
+
+\begin{center}
+\texttt{User -> SavedLocation -> WeatherSnapshot}
+\end{center}
+
+Jeden użytkownik może mieć wiele lokalizacji. Jedna lokalizacja może mieć
+wiele pomiarów. Taki układ ogranicza powtarzanie tych samych danych.
+
+\term{Migration} to plik opisujący zmianę schematu bazy. Django wykonuje
+migracje w kolejności. Dzięki temu inny komputer może odtworzyć dokładnie
+taką samą strukturę tabel.
+
+\subsection{API i pierwsze widoki}
+
+Backend otrzymał endpointy, czyli konkretne adresy API. Przykłady:
+
+\begin{itemize}
+  \item \code{GET /api/earthquakes/} zwraca trzęsienia ziemi,
+  \item \code{GET /api/locations/} zwraca lokalizacje użytkownika,
+  \item \code{GET /api/dashboard/summary/} zwraca agregacje,
+  \item \code{POST /api/admin/sync/volcanoes/} uruchamia synchronizację.
+\end{itemize}
+
+\term{GET} służy głównie do odczytu. \term{POST} tworzy zasób albo uruchamia
+operację. \term{DELETE} usuwa zasób. Odpowiedź ma format \term{JSON}, czyli
+tekstową strukturę z polami, listami i wartościami.
+
+\section{Technologie i powody wyboru}
+
+\subsection{Django i Django REST Framework}
+
+Django daje \term{ORM}, czyli warstwę pozwalającą pisać zapytania do bazy
+za pomocą obiektów Pythona. Udostępnia też migracje, panel administratora,
+walidację i system użytkowników.
+
+Django REST Framework dodaje \term{serializer}. Serializer sprawdza dane
+wejściowe i zamienia modele na JSON. Dodaje także klasy uprawnień, na przykład
+\code{IsAuthenticated} oraz \code{IsAdminUser}.
+
+Zalety:
+
+\begin{itemize}
+  \item wiele potrzebnych elementów jest spójnych i gotowych,
+  \item łatwo tworzyć testy API,
+  \item panel Django pomaga administratorowi oglądać bazę,
+  \item OpenAPI można generować z kodu.
+\end{itemize}
+
+Alternatywą byłby FastAPI. Jest lekki i ma bardzo dobrą obsługę typów, ale
+panel administratora i część struktury należałoby dobrać osobno. Inną
+alternatywą jest NestJS w TypeScript. Daje uporządkowaną architekturę, lecz
+w tym projekcie Django szybciej zapewnia bazę, migracje i administrację.
+
+\subsection{React i Vite}
+
+React buduje interfejs z \term{component}, czyli małych części takich jak
+mapa, panel logowania lub tabela. \term{State} oznacza dane, które zmieniają
+się podczas działania widoku. Zmiana stanu powoduje ponowne narysowanie
+odpowiedniej części strony.
+
+Vite jest narzędziem uruchamiającym środowisko developerskie i tworzącym
+\term{production build}, czyli zoptymalizowany zestaw plików do publikacji.
+
+Zalety:
+
+\begin{itemize}
+  \item strona nie musi przeładowywać się po każdym kliknięciu,
+  \item łatwo rozdzielić widoki i stany ładowania,
+  \item bogaty ekosystem map i wykresów,
+  \item szybki start środowiska programistycznego.
+\end{itemize}
+
+Alternatywami są Vue i Svelte. Oba byłyby poprawne. Vue ma łagodny próg
+wejścia, a Svelte tworzy małe paczki kodu. React został wybrany ze względu
+na bibliotekę React Leaflet i doświadczenie potrzebne do dynamicznego
+dashboardu.
+
+\subsection{PostgreSQL}
+
+PostgreSQL jest relacyjną bazą danych. \term{Relational database} przechowuje
+dane w tabelach i łączy je kluczami. Projekt korzysta z:
+
+\begin{itemize}
+  \item \term{constraint}, czyli ograniczeń poprawności,
+  \item \term{index}, czyli dodatkowej struktury przyspieszającej wyszukiwanie,
+  \item \term{transaction}, czyli grupy zmian wykonywanych wspólnie,
+  \item \term{cascade delete}, czyli usuwania zależnych rekordów.
+\end{itemize}
+
+Alternatywą jest SQLite. Jest prostszy i świetny do małych testów, ale
+PostgreSQL lepiej przedstawia realistyczne środowisko wielousługowe.
+MongoDB byłoby elastyczne dla surowych dokumentów API, lecz relacje
+użytkownika, lokalizacji i historii naturalnie pasują do SQL.
+
+\subsection{Redis i cache}
+
+\term{Cache} to szybka pamięć przechowująca wynik, który można później
+odtworzyć. Redis przechowuje dane w pamięci operacyjnej i jest dostępny dla
+backendu oraz workera.
+
+\term{TTL}, czyli \textit{Time To Live}, określa czas życia wpisu. Pogoda
+lokalizacji ma TTL 15 minut. W tym czasie kolejne kliknięcie nie wysyła
+identycznego żądania do Open-Meteo.
+
+\term{Invalidation} oznacza usunięcie nieaktualnego cache. Po synchronizacji
+trzęsień ziemi cache dashboardu jest usuwany, aby następny odczyt policzył
+nowe statystyki.
+
+Alternatywą jest pamięć procesu Django. Byłaby prostsza, ale różne procesy
+nie widziałyby wspólnego cache, a restart usuwałby wszystkie wpisy.
+
+\subsection{Celery}
+
+Celery jest systemem \term{task queue}, czyli kolejki zadań. Backend dodaje
+zadanie do Redisa, a osobny \term{worker} wykonuje je w tle.
+\term{Celery Beat} jest schedulerem, czyli procesem uruchamiającym zadania
+według harmonogramu.
+
+Korzyść jest prosta: użytkownik nie czeka, aż serwer pobierze tysiące
+rekordów. Trzęsienia są synchronizowane często, pogoda co 15 minut, a duży
+katalog wulkanów raz dziennie.
+
+Alternatywą byłby systemowy cron. Jest prostszy, lecz gorzej integruje się
+z logami zadań i ręcznym uruchamianiem synchronizacji z panelu.
+
+\subsection{Docker Compose}
+
+Docker Compose opisuje kilka kontenerów w jednym pliku. Projekt uruchamia
+frontend, backend, PostgreSQL, Redis, worker i scheduler.
+
+\term{Healthcheck} jest krótkim testem sprawdzającym, czy usługa odpowiada.
+Backend startuje po bazie i Redisie, a frontend czeka na zdrowy backend.
+Zmniejsza to liczbę błędów wynikających wyłącznie ze złej kolejności startu.
+
+\section{Skąd pochodzą dane}
+
+\subsection{Pogoda}
+
+Open-Meteo zwraca temperaturę, wilgotność, ciśnienie, wiatr, kod pogody,
+opad i zachmurzenie. Backend buduje adres z parametrami, pobiera JSON,
+normalizuje nazwy pól i zwraca spójny format frontendowi.
+
+Globalna mapa obejmuje stolice świata, największe miasta państw G20 i
+20 największych miast Polski. Współrzędne stolic pochodzą z World Bank API.
+Punkty są łączone i usuwane są duplikaty.
+
+\subsection{Trzęsienia ziemi}
+
+USGS udostępnia GeoJSON. \term{GeoJSON} to odmiana JSON przeznaczona dla
+obiektów geograficznych. Współrzędne mają kolejność longitude, latitude,
+czyli długość, a potem szerokość.
+
+Zdarzenia są zapisywane przez \code{update_or_create}. Ta operacja aktualizuje
+rekord o znanym identyfikatorze zamiast tworzyć duplikat. Frontend filtruje
+czas, magnitudę, głębokość i tekst regionu, a właściwe filtrowanie wykonuje
+PostgreSQL.
+
+\subsection{Wulkany i VEI}
+
+Smithsonian Global Volcanism Program udostępnia dane przez
+\term{WFS}, czyli \textit{Web Feature Service}. Jest to standard pobierania
+obiektów geograficznych. Aplikacja pobiera:
+
+\begin{itemize}
+  \item katalog 1215 wulkanów holoceńskich,
+  \item osobną historię erupcji.
+\end{itemize}
+
+Obie listy są łączone przez \code{Volcano_Number}. \term{VEI}, czyli
+\textit{Volcanic Explosivity Index}, opisuje siłę konkretnej erupcji w skali
+zwykle od 0 do 8. Nie jest stałą cechą wulkanu.
+
+Dlatego aplikacja pokazuje:
+
+\begin{itemize}
+  \item VEI ostatniej znanej erupcji,
+  \item najwyższe znane VEI w historii wulkanu,
+  \item brak danych, gdy źródło nie sklasyfikowało erupcji.
+\end{itemize}
+
+Każdy wulkan jest zaznaczony ikoną \code{pictures/Volcano.png}. Panel pokazuje
+także kraj, region, typ, wysokość, rok erupcji i opis geologiczny.
+
+Źródło: \url{https://volcano.si.edu/database/webservices.cfm}.
+
+\subsection{Burze i cyklony}
+
+Potencjał burzowy jest obliczany z bieżących danych Open-Meteo, między innymi
+opadu, porywów wiatru i kodu pogody. Nie jest to oficjalny alert.
+
+Cyklony pochodzą z NASA EONET. Są oddzielone od punktów potencjału burzowego,
+ponieważ cyklon jest zorganizowanym systemem z własną nazwą i historią.
+
+\section{Logowanie i bezpieczeństwo}
+
+Google Identity Services zwraca \term{ID token}. Backend sprawdza jego podpis,
+odbiorcę, ważność i potwierdzenie adresu e-mail. Następnie wydaje własny
+\term{access token} oraz \term{refresh token} JWT.
+
+\term{JWT}, czyli \textit{JSON Web Token}, jest podpisanym tekstem zawierającym
+informację o użytkowniku. Access token jest krótko ważny. Refresh token służy
+do uzyskania nowego access tokenu bez ponownego logowania.
+
+Backend zawsze filtruje prywatne lokalizacje po aktualnym użytkowniku.
+Samo zmienienie identyfikatora w adresie nie pozwala odczytać cudzego punktu.
+Panel synchronizacji dodatkowo wymaga flagi \code{is_staff}.
+
+Wersja edukacyjna przechowuje tokeny w \term{localStorage}. Jest to wygodne,
+ale w produkcji warto przenieść refresh token do cookie \code{HttpOnly},
+wymusić HTTPS i dodać restrykcyjną \term{Content Security Policy}.
+
+\section{Najważniejsze optymalizacje}
+
+\subsection{Ograniczenie zewnętrznych requestów}
+
+Pogoda jest pobierana paczkami, a nie osobno dla każdego miasta. Redis
+przechowuje wynik. Przy awarii wybranych źródeł aplikacja może użyć ostatniej
+poprawnej kopii.
+
+\subsection{Idempotentna synchronizacja}
+
+\term{Idempotent} oznacza, że wielokrotne wykonanie operacji daje ten sam
+stan końcowy. Stabilne identyfikatory USGS i Smithsonian powodują aktualizację
+rekordu zamiast tworzenia kolejnych kopii.
+
+\subsection{Indeksy bazy}
+
+Indeksy dodano do pól często używanych w filtrach: czasu trzęsienia,
+magnitudy, regionu, kraju, nazwy wulkanu i maksymalnego VEI. Indeks zajmuje
+dodatkowe miejsce, ale przyspiesza odczyt.
+
+\subsection{Lazy loading}
+
+\term{Lazy loading} oznacza ładowanie kodu dopiero wtedy, gdy jest potrzebny.
+Widok lokalizacji, dashboard, tabela sejsmiczna i panel synchronizacji są
+osobnymi paczkami. Użytkownik oglądający tylko mapę nie musi od razu pobierać
+całego kodu wykresów.
+
+\subsection{Ochrona przed niepełnym importem}
+
+GeoServer podaje liczbę wszystkich dopasowanych rekordów. Import porównuje ją
+z liczbą odebranych elementów. Jeśli odpowiedź została ucięta, synchronizacja
+kończy się błędem i nie usuwa poprzedniego katalogu.
+
+\section{Testy i jakość}
+
+Backend ma testy jednostkowe i integracyjne. Sprawdzają między innymi:
+
+\begin{itemize}
+  \item logowanie Google i wydawanie JWT,
+  \item ochronę prywatnych endpointów,
+  \item walidację współrzędnych,
+  \item cache pogody,
+  \item filtry trzęsień ziemi,
+  \item łączenie wulkanów z historią VEI,
+  \item uprawnienia administratora,
+  \item agregacje dashboardu.
+\end{itemize}
+
+ESLint analizuje kod JavaScript, a Vite wykonuje próbny build produkcyjny.
+GitHub Actions automatycznie uruchamia testy backendu, lint i build po
+wysłaniu zmian do repozytorium.
+
+\term{CI}, czyli \textit{Continuous Integration}, oznacza automatyczne
+sprawdzanie zmian. Nie zastępuje przeglądu kodu, ale szybko wykrywa wiele
+regresji.
+
+\section{Jak działa pojedyncze kliknięcie}
+
+Przykład: użytkownik wybiera warstwę wulkanów.
+
+\begin{enumerate}
+  \item React wywołuje funkcję pobierającą dane.
+  \item Axios wysyła GET do endpointu backendu.
+  \item Django wykonuje zapytanie przez ORM.
+  \item PostgreSQL zwraca katalog wulkanów.
+  \item Serializer zamienia rekordy na JSON.
+  \item React zapisuje odpowiedź w state.
+  \item React Leaflet tworzy markery z ikoną Volcano.png.
+  \item Kliknięcie markera zapisuje wybrany wulkan w state.
+  \item Panel szczegółów pokazuje VEI i dane geologiczne.
+\end{enumerate}
+
+Duże pobieranie ze Smithsonian nie dzieje się podczas tego kliknięcia.
+Wykonał je wcześniej worker Celery. To rozdzielenie jest jedną z
+najważniejszych decyzji architektonicznych projektu.
+
+\section{Uruchomienie projektu}
+
+Najpierw należy utworzyć lokalne pliki środowiskowe i ustawić identyfikator
+Google OAuth. Następnie cały zestaw usług uruchamia polecenie:
+
+\begin{center}
+\code{docker compose up --build}
+\end{center}
+
+Frontend działa pod adresem \url{http://localhost:5174}, a backend pod
+\url{http://localhost:8001}. Dokumentacja Swagger jest dostępna pod
+\url{http://localhost:8001/api/docs/}.
+
+\term{Environment variable} to zmienna konfiguracyjna przekazywana programowi
+spoza kodu. Sekrety i ustawienia zależne od komputera nie powinny być wpisane
+na stałe do repozytorium.
+
+\section{Ograniczenia i dalszy rozwój}
+
+Projekt jest rozbudowany, ale nadal edukacyjny. Najważniejsze ograniczenia:
+
+\begin{itemize}
+  \item około 1200 ikon może obciążyć słabszą przeglądarkę,
+  \item brak VEI jest częsty i nie wolno go zastępować zgadywaną wartością,
+  \item potencjał burzowy nie jest oficjalnym ostrzeżeniem,
+  \item token w localStorage wymaga szczególnej ochrony przed XSS,
+  \item frontend nie ma jeszcze pełnego zestawu testów komponentów i E2E.
+\end{itemize}
+
+Rozsądnym kolejnym krokiem jest \term{marker clustering}, czyli grupowanie
+blisko położonych ikon przy małym powiększeniu mapy. Następnie warto dodać
+test end-to-end logowania, zapisania lokalizacji i otwarcia historii pogody.
+
+\section{Podsumowanie}
+
+NieZmoknij pokazuje pełny przepływ danych: od zewnętrznego API,
+przez zadanie Celery, walidację, PostgreSQL i Redis, aż do mapy React.
+Każda główna technologia ma konkretne zadanie. Najważniejszą lekcją nie jest
+liczba bibliotek, lecz rozdzielenie odpowiedzialności i świadome opisanie
+trade-offów, czyli kosztów każdej decyzji.
+
+\end{document}

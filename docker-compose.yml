@@ -7,17 +7,23 @@ services:
       POSTGRES_DB: mzm_db
       POSTGRES_USER: mzm_user
       POSTGRES_PASSWORD: mzm_password
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mzm_user -d mzm_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
 
   redis:
     image: redis:7
     container_name: mzm_redis
     restart: unless-stopped
-    ports:
-      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
 
   backend:
     build:
@@ -28,12 +34,81 @@ services:
     volumes:
       - ./backend:/app
     ports:
-      - "8000:8000"
+      - "8001:8000"
     env_file:
-      - .env.example
+      - path: .env
+        required: false
+    environment:
+      POSTGRES_DB: mzm_db
+      POSTGRES_USER: mzm_user
+      POSTGRES_PASSWORD: mzm_password
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,backend
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health/', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+
+  worker:
+    build:
+      context: ./backend
+    container_name: mzm_worker
+    restart: unless-stopped
+    entrypoint: []
+    command: celery -A config worker --loglevel=info
+    volumes:
+      - ./backend:/app
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      POSTGRES_DB: mzm_db
+      POSTGRES_USER: mzm_user
+      POSTGRES_PASSWORD: mzm_password
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  scheduler:
+    build:
+      context: ./backend
+    container_name: mzm_scheduler
+    restart: unless-stopped
+    entrypoint: []
+    command: celery -A config beat --loglevel=info --schedule=/tmp/celerybeat-schedule
+    volumes:
+      - ./backend:/app
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      POSTGRES_DB: mzm_db
+      POSTGRES_USER: mzm_user
+      POSTGRES_PASSWORD: mzm_password
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+    depends_on:
+      backend:
+        condition: service_healthy
 
   frontend:
     build:
@@ -45,12 +120,16 @@ services:
       - ./frontend:/app
       - /app/node_modules
     ports:
-      - "5173:5173"
+      - "5174:5173"
     # Vite odczytuje publiczny Client ID Google ze zmiennej rozpoczynającej się od VITE_.
     env_file:
-      - .env.example
+      - path: frontend/.env.local
+        required: false
+    environment:
+      VITE_API_BASE_URL: http://localhost:8001/api
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
 
 volumes:
   postgres_data:

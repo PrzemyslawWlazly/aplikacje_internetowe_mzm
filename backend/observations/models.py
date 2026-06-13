@@ -41,9 +41,9 @@ class SavedLocation(TimestampedModel):
     class Meta:
         ordering = ['name']  # Domyślnie sortujemy lokalizacje alfabetycznie.
         constraints = [  # Ograniczenia pilnują spójności na poziomie bazy.
-            models.UniqueConstraint(  # Jeden użytkownik nie powinien mieć dwa razy tej samej lokalizacji.
-                fields=['user', 'name', 'latitude', 'longitude'],  # Unikalność zależy od właściciela, nazwy i punktu.
-                name='unique_saved_location_per_user',  # Nazwa ograniczenia będzie widoczna w migracji i bazie.
+            models.UniqueConstraint(  # Jeden użytkownik nie powinien zapisać tych samych współrzędnych dwa razy.
+                fields=['user', 'latitude', 'longitude'],  # Nazwa może się zmienić, ale punkt geograficzny pozostaje ten sam.
+                name='unique_saved_coordinates_per_user',  # Nazwa ograniczenia opisuje rzeczywistą regułę biznesową.
             )
         ]
 
@@ -65,12 +65,27 @@ class WeatherSnapshot(TimestampedModel):
     )
     pressure = models.PositiveSmallIntegerField()  # Ciśnienie atmosferyczne zapisujemy jako dodatnią liczbę.
     wind_speed = models.DecimalField(max_digits=6, decimal_places=2)  # Prędkość wiatru może mieć część dziesiętną.
+    cloud_cover = models.PositiveSmallIntegerField(  # Zachmurzenie zapisujemy jako procent nieba pokrytego chmurami.
+        null=True,  # Starsze rekordy i źródła bez tej wartości pozostają poprawne.
+        blank=True,  # Pole nie musi być uzupełniane ręcznie w panelu administracyjnym.
+        validators=[MinValueValidator(0), MaxValueValidator(100)],  # Procent musi mieścić się od 0 do 100.
+    )
+    weather_code = models.PositiveSmallIntegerField(  # Kod WMO pozwala odtworzyć opis warunków pogodowych.
+        null=True,  # Nie każde źródło musi udostępniać kod.
+        blank=True,  # Brak kodu nie blokuje zapisania pozostałych parametrów.
+    )
     description = models.CharField(max_length=255, blank=True)  # Tekstowy opis pogody jest opcjonalny.
     source = models.CharField(max_length=80)  # Źródło danych, np. Open-Meteo.
     measured_at = models.DateTimeField()  # Czas faktycznego pomiaru z API zewnętrznego.
 
     class Meta:
         ordering = ['-measured_at']  # Najnowsze pomiary pokazujemy jako pierwsze.
+        constraints = [  # Ograniczenie na poziomie bazy chroni historię również przy równoległych workerach.
+            models.UniqueConstraint(  # Ten sam pomiar źródłowy może wystąpić tylko raz dla danej lokalizacji.
+                fields=['location', 'source', 'measured_at'],  # Czas i źródło jednoznacznie opisują snapshot punktu.
+                name='unique_weather_measurement_per_location',  # Nazwa pojawi się w migracji i diagnostyce bazy.
+            )
+        ]
         indexes = [  # Indeksy przyspieszają typowe zapytania.
             models.Index(fields=['location', '-measured_at']),  # Historia lokalizacji będzie filtrowana po czasie.
         ]
@@ -117,33 +132,55 @@ class EarthquakeEvent(TimestampedModel):
 
 
 class VolcanicEvent(TimestampedModel):
-    """Zdarzenie wulkaniczne albo naturalne powiązane z wulkanem."""
+    """Wulkan z oficjalnego katalogu Smithsonian Global Volcanism Program."""
 
-    external_id = models.CharField(max_length=120, unique=True)  # Id z API pozwala aktualizować rekord bez duplikacji.
-    title = models.CharField(max_length=255)  # Tytuł zdarzenia do listy.
-    volcano_name = models.CharField(max_length=160, blank=True)  # Nazwa wulkanu może nie zawsze być dostępna.
-    latitude = models.DecimalField(  # Szerokość geograficzna zdarzenia.
+    external_id = models.CharField(max_length=120, unique=True)  # Numer GVP jednoznacznie identyfikuje wulkan.
+    title = models.CharField(max_length=255)  # Tytuł pozostaje dla zgodności ze starszym kontraktem API.
+    volcano_name = models.CharField(max_length=160, blank=True)  # Oficjalna podstawowa nazwa pochodzi z katalogu GVP.
+    latitude = models.DecimalField(  # Szerokość geograficzna środka wulkanu.
         max_digits=9,  # Zakres pozwala zapisać cały świat.
         decimal_places=6,  # Dokładność jest wystarczająca dla markerów mapy.
         validators=[MinValueValidator(-90), MaxValueValidator(90)],  # Walidacja poprawnej szerokości.
     )
-    longitude = models.DecimalField(  # Długość geograficzna zdarzenia.
+    longitude = models.DecimalField(  # Długość geograficzna środka wulkanu.
         max_digits=9,  # Zakres pozwala zapisać cały świat.
         decimal_places=6,  # Dokładność jest spójna z latitude.
         validators=[MinValueValidator(-180), MaxValueValidator(180)],  # Walidacja poprawnej długości.
     )
-    region = models.CharField(max_length=120, blank=True)  # Region pomaga filtrować i grupować zdarzenia.
-    description = models.TextField(blank=True)  # Opis z API może być dłuższy niż zwykły tytuł.
-    event_time = models.DateTimeField()  # Czas rozpoczęcia lub aktualizacji zdarzenia.
-    source = models.CharField(max_length=80)  # Źródło danych wulkanicznych.
-    detail_url = models.URLField(blank=True)  # Link do szczegółów zewnętrznych.
-    status = models.CharField(max_length=80, blank=True)  # Status jest opcjonalny, bo nie każde API go zwraca.
+    country = models.CharField(max_length=120, blank=True)  # Kraj ułatwia filtrowanie pełnego katalogu.
+    region = models.CharField(max_length=160, blank=True)  # Region wulkaniczny pochodzi z klasyfikacji Smithsonian.
+    volcano_type = models.CharField(max_length=120, blank=True)  # Typ opisuje morfologię, np. stratowulkan lub kaldera.
+    elevation_m = models.IntegerField(null=True, blank=True)  # Wysokość może być ujemna dla obiektów podmorskich.
+    last_eruption_year = models.IntegerField(null=True, blank=True)  # Rok może być ujemny dla erupcji przed naszą erą.
+    vei = models.PositiveSmallIntegerField(  # VEI ostatniej znanej erupcji nie jest cechą stałą samego wulkanu.
+        null=True,  # Nie każdej erupcji udało się przypisać indeks.
+        blank=True,  # Brak wartości jest informacją naukową, a nie błędem importu.
+        validators=[MinValueValidator(0), MaxValueValidator(8)],  # Klasyczny zakres VEI wynosi od 0 do 8.
+    )
+    max_vei = models.PositiveSmallIntegerField(  # Najwyższe znane VEI podsumowuje historię erupcyjną wulkanu.
+        null=True,  # Wulkan bez sklasyfikowanej erupcji pozostaje widoczny na mapie.
+        blank=True,  # Pole jest opcjonalne również w panelu Django.
+        validators=[MinValueValidator(0), MaxValueValidator(8)],  # Chronimy bazę przed błędną wartością źródłową.
+    )
+    tectonic_setting = models.CharField(max_length=180, blank=True)  # Ustawienie tektoniczne wyjaśnia genezę wulkanu.
+    geologic_epoch = models.CharField(max_length=80, blank=True)  # Epoka odróżnia katalog holoceński od innych danych.
+    evidence_category = models.CharField(max_length=120, blank=True)  # Pole opisuje dowód włączenia do katalogu.
+    rock_type = models.CharField(max_length=160, blank=True)  # Dominujący typ skał daje podstawowy kontekst geologiczny.
+    description = models.TextField(blank=True)  # Smithsonian udostępnia rozbudowane podsumowanie geologiczne.
+    event_time = models.DateTimeField(null=True, blank=True)  # Dla erupcji BCE używamy osobnego pola roku.
+    source = models.CharField(max_length=80)  # Źródłem katalogu jest Smithsonian GVP.
+    detail_url = models.URLField(max_length=500, blank=True)  # Link prowadzi do oficjalnej karty wulkanu.
+    photo_url = models.URLField(max_length=500, blank=True)  # Opcjonalne zdjęcie pochodzi z galerii Smithsonian.
+    photo_caption = models.TextField(blank=True)  # Podpis zdjęcia zachowuje kontekst źródłowy.
+    status = models.CharField(max_length=80, blank=True)  # Status „catalogued” odróżnia katalog od aktywnego alarmu.
 
     class Meta:
-        ordering = ['-event_time']  # Najnowsze zdarzenia wulkaniczne pokazujemy jako pierwsze.
+        ordering = ['volcano_name']  # Pełny katalog najłatwiej przeglądać alfabetycznie.
         indexes = [  # Indeksy wspierają listę i filtrowanie.
-            models.Index(fields=['-event_time']),  # Przyspiesza sortowanie po czasie.
+            models.Index(fields=['volcano_name']),  # Przyspiesza alfabetyczną listę wszystkich wulkanów.
+            models.Index(fields=['country']),  # Filtr kraju jest naturalny przy globalnym katalogu.
             models.Index(fields=['region']),  # Przyspiesza filtrowanie po regionie.
+            models.Index(fields=['max_vei']),  # Indeks wspiera wybór wulkanów o znanych silnych erupcjach.
         ]
 
     def __str__(self):
