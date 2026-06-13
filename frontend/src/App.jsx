@@ -129,7 +129,7 @@ const mapModes = {
     label: 'Pogoda swiat',
     eyebrow: 'Mapa pogodowa',
     title: 'Globalna pogoda',
-    subtitle: 'Stolice swiata, miasta G20, 20 najwiekszych miast Polski i dodatkowa globalna siatka miejscowosci.',
+    subtitle: 'Wybrane miejscowości',
   },
   // Tryb sejsmiczny pobiera dane z USGS przez backend.
   seismic: {
