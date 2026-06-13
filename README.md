@@ -15,23 +15,23 @@ Decyzje architektoniczne są opisane w katalogu `docs/adr`.
 
 
 
+<img width="1799" height="946" alt="Screenshot from 2026-06-13 21-53-26" src="https://github.com/user-attachments/assets/cb7827bb-4097-4000-b878-2e275daed2e3" />
+<img width="1799" height="946" alt="Screenshot from 2026-06-13 21-53-44" src="https://github.com/user-attachments/assets/908183df-92a9-4124-aa33-c2bb7016e3e1" />
+<img width="1799" height="946" alt="Screenshot from 2026-06-13 21-54-09" src="https://github.com/user-attachments/assets/b5c8f3b7-6d91-485d-9c8a-abcd62a68d9c" />
+<img width="1799" height="946" alt="Screenshot from 2026-06-13 21-54-17" src="https://github.com/user-attachments/assets/3b40d6a9-31f8-46ad-b1f3-6c8a7d28404e" />
+<img width="1799" height="946" alt="Screenshot from 2026-06-13 21-54-46" src="https://github.com/user-attachments/assets/1383ab3b-3434-48e6-8a5c-3f74c49ea5c1" />
+<img width="1799" height="946" alt="Screenshot from 2026-06-13 21-55-14" src="https://github.com/user-attachments/assets/3d35cec2-b22f-4c5a-950c-b69b46cf4a95" />
+<img width="1799" height="946" alt="Screenshot from 2026-06-13 21-55-25" src="https://github.com/user-attachments/assets/a7357424-ea46-4a90-85b7-0eaeb828e19e" />
+<img width="1799" height="946" alt="Screenshot from 2026-06-13 21-55-38" src="https://github.com/user-attachments/assets/b1db51ae-0184-45fd-87ad-c5ba2650ec40" />
 
 
 
 
 
 
-<img width="1793" height="955" alt="Screenshot from 2026-06-13 12-42-43" src="https://github.com/user-attachments/assets/2baab562-7d4d-4fb3-a44f-c3361bb8b54e" />
 
-<img width="1793" height="955" alt="Screenshot from 2026-06-13 12-42-56" src="https://github.com/user-attachments/assets/0eb5b376-3597-46e9-807d-d562ca7e9b1d" />
 
-<img width="1793" height="955" alt="Screenshot from 2026-06-13 12-43-05" src="https://github.com/user-attachments/assets/10989f9d-9576-4bde-8770-e98a717d4a1f" />
 
-<img width="1793" height="731" alt="Screenshot from 2026-06-13 12-43-28" src="https://github.com/user-attachments/assets/65321354-9090-447a-ba09-06aca07d629d" />
-<img width="1793" height="943" alt="Screenshot from 2026-06-13 12-43-39" src="https://github.com/user-attachments/assets/e9710df4-e51d-4a6a-9ae7-5088a6387d88" />
-<img width="1793" height="943" alt="Screenshot from 2026-06-13 12-43-49" src="https://github.com/user-attachments/assets/3c66e487-eb06-4734-bd87-9db5b2d3974b" />
-
-<img width="1793" height="943" alt="Screenshot from 2026-06-13 12-52-03" src="https://github.com/user-attachments/assets/dd2b4e51-0b34-4550-8ac1-a502ec4ca4d2" />
 
 ## Uruchomienie Docker
 
