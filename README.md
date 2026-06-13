@@ -31,6 +31,7 @@ Decyzje architektoniczne są opisane w katalogu `docs/adr`.
 <img width="1793" height="943" alt="Screenshot from 2026-06-13 12-43-39" src="https://github.com/user-attachments/assets/e9710df4-e51d-4a6a-9ae7-5088a6387d88" />
 <img width="1793" height="943" alt="Screenshot from 2026-06-13 12-43-49" src="https://github.com/user-attachments/assets/3c66e487-eb06-4734-bd87-9db5b2d3974b" />
 
+<img width="1793" height="943" alt="Screenshot from 2026-06-13 12-52-03" src="https://github.com/user-attachments/assets/dd2b4e51-0b34-4550-8ac1-a502ec4ca4d2" />
 
 ## Uruchomienie Docker
 
