@@ -166,9 +166,7 @@ GitHub Actions wykonuje te same kontrole automatycznie dla pushy i pull request�
 - Prywatne zapisane lokalizacje z historią pogody.
 - Panel administratora do uruchamiania synchronizacji Celery i odczytu logów `SyncJob`.
 
-## Prezentacja
 
-Gotowy plan demonstracji, omówienia architektury i odpowiedzi na pytania znajduje się w [`docs/SCENARIUSZ_PREZENTACJI.md`](docs/SCENARIUSZ_PREZENTACJI.md).
 
 ## Model danych
 
