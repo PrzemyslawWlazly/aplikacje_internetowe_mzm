@@ -13,6 +13,25 @@ Studencka aplikacja internetowa agregująca i wizualizująca pogodę, trzęsieni
 
 Decyzje architektoniczne są opisane w katalogu `docs/adr`.
 
+
+
+
+
+
+
+
+
+<img width="1793" height="955" alt="Screenshot from 2026-06-13 12-42-43" src="https://github.com/user-attachments/assets/2baab562-7d4d-4fb3-a44f-c3361bb8b54e" />
+
+<img width="1793" height="955" alt="Screenshot from 2026-06-13 12-42-56" src="https://github.com/user-attachments/assets/0eb5b376-3597-46e9-807d-d562ca7e9b1d" />
+
+<img width="1793" height="955" alt="Screenshot from 2026-06-13 12-43-05" src="https://github.com/user-attachments/assets/10989f9d-9576-4bde-8770-e98a717d4a1f" />
+
+<img width="1793" height="731" alt="Screenshot from 2026-06-13 12-43-28" src="https://github.com/user-attachments/assets/65321354-9090-447a-ba09-06aca07d629d" />
+<img width="1793" height="943" alt="Screenshot from 2026-06-13 12-43-39" src="https://github.com/user-attachments/assets/e9710df4-e51d-4a6a-9ae7-5088a6387d88" />
+<img width="1793" height="943" alt="Screenshot from 2026-06-13 12-43-49" src="https://github.com/user-attachments/assets/3c66e487-eb06-4734-bd87-9db5b2d3974b" />
+
+
 ## Uruchomienie Docker
 
 1. Utwórz lokalną konfigurację:
